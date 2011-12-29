@@ -78,8 +78,8 @@ class PCounter(object):
   def __init__(self, rcfile=None, outputfile=None, icounters=None):
     self.rcfile = rcfile if rcfile else RC_FILE 
     self.usbio = None
-    self.counts = [ [0] * N_COUNTS ] * N_BITS_GROUP
-    self.onFlag = [ [ False ] * N_BITS ] * N_BITS_GROUP
+    self.counts = [ [0] * N_COUNTS for i in range(N_BITS_GROUP) ]
+    self.onFlag = [ [ False ] * N_BITS for i in range(N_BITS_GROUP) ]
     self.icounters = icounters if icounters else ([None] * N_BITS_GROUP)
 
   def init_device(self):
@@ -113,43 +113,22 @@ class PCounter(object):
     for i in xrange(N_BITS_GROUP):
       bitgroup = (port >> (N_BITS * i)) & BITMASK
       counts = self.counts[i]
-      icounter = self.icounters[i]
       flags = self.onFlag[i]
+      icounter = self.icounters[i]
 
       for j in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
         if (bitgroup & (1 << j)) != 0:
           # 状態がOff→Onになるとき
-          if flags[j] == False:
+          if not flags[j]:
             flags[j] = True
-            counts[j] += 1
-            # それがカウンターだったら 
-            if j == USBIO_BIT.COUNT:
-              # 総回転数もカウントアップする
-              counts[COUNT_INDEX.TOTALCOUNT] += 1
-            # それがボーナスだったら 
-            if j == USBIO_BIT.BIT_BONUS:
-              # かつチャンス中なら
-              if bitgroup & (1 << USBIO_BIT.CHANCE):
-                # コンボカウンターもカウントアップする
-                counts[COUNT_INDEX.CHAIN] += 1
-            # 特定カウント処理
             if icounter and callable(icounter.func_to_on):
-              icounter.func_to_on(j, counts)
+              icounter.func_to_on(j, bitgroup, counts)
         else:
           # 状態がOn→Offになるとき
-          if flags[j] == True:
+          if flags[j]:
             flags[j] = False
-            # それがボーナスだったら
-            if j == USBIO_BIT.BONUS:
-              # 回転数カウンタをリセットする
-              counts[COUNT_INDEX.COUNT] = 0
-            # それがチャンス中だったら
-            if j == USBIO_BIT.CHANCE:
-              # コンボカウンタをリセットする
-              counts[COUNT_INDEX.CHAIN] = 0
-            # 特定カウント処理
             if icounter and callable(icounter.func_to_off):
-              icounter.func_to_off(j, counts)
+              icounter.func_to_off(j, bitgroup, counts)
 
   def mainloop(self, reset=False, nonull=False):
     self.init_device()
@@ -172,6 +151,28 @@ class PCounter(object):
     finally:
       self.save()
     return 0
+
+
+def to_on_default(cbittype, bitgroup, counts):
+  if cbittype == USBIO_BIT.COUNT:
+    counts[COUNT_INDEX.COUNT] += 1
+    counts[COUNT_INDEX.TOTALCOUNT] += 1
+  if cbittype == USBIO_BIT.BONUS:
+    counts[COUNT_INDEX.BONUS] += 1
+    # チャンス中なら
+    if bitgroup & (1 << USBIO_BIT.CHANCE):
+      counts[COUNT_INDEX.CHAIN] += 1
+  if cbittype == USBIO_BIT.CHANCE:
+    counts[COUNT_INDEX.CHANCE] += 1
+  if cbittype == USBIO_BIT.SBONUS:
+    counts[COUNT_INDEX.SBONUS] += 1
+
+
+def to_off_default(cbittype, bitgroup, counts):
+  if cbittype == USBIO_BIT.BONUS:
+    counts[COUNT_INDEX.COUNT] = 0
+  if cbittype == USBIO_BIT.CHANCE:
+    counts[COUNT_INDEX.CHAIN] = 0
 
 
 def gen_bonusrate(total, now):
@@ -216,16 +217,33 @@ def output_for_stealth(counts):
 
 
 ### FOR CR X-FILES
+COUNT_INDEX_XFILES_XR = COUNT_INDEX.USER
+
+def to_on_xfiles(cbittype, bitgroup, counts):
+  if cbittype == USBIO_BIT.COUNT:
+    counts[COUNT_INDEX.COUNT] += 1
+    counts[COUNT_INDEX.TOTALCOUNT] += 1
+  if cbittype == USBIO_BIT.BONUS:
+    counts[COUNT_INDEX.BONUS] += 1
+    if bitgroup & (1 << USBIO_BIT.CHANCE):
+      counts[COUNT_INDEX.CHAIN] += 1
+      if counts[COUNT_INDEX.CHAIN] == 2:
+        counts[COUNT_INDEX_XFILES_XR] += 1
+  if cbittype == USBIO_BIT.CHANCE:
+    counts[COUNT_INDEX.CHANCE] += 1
+  if cbittype == USBIO_BIT.SBONUS:
+    counts[COUNT_INDEX.SBONUS] += 1
+
+  
 def output_for_xfiles(counts):
   bonus_rate = gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], counts[COUNT_INDEX.BONUS])
   sbonus_rate = gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], counts[COUNT_INDEX.SBONUS])
-  chain = gen_chain(counts[COUNT_INDEX.CHAIN])
+  chain = gen_chain(counts[COUNT_INDEX.CHAIN] - 1)
 
   fmt = u'<span font-desc="Ricty Bold 15">GAMES\n' \
         u'<span size="x-large">{0}</span>/{1}\n' \
-        u'\n' \
         u'BONUS(XR/UZ/ALL):\n' \
-        u'<span size="large">{2}/{3}/{6}</span>{5}</span>'
+        u'<span size="large">{8}/{3}/{6}</span>{5}</span>'
   return  fmt.format(decolate_number(counts[COUNT_INDEX.COUNT], 4), 
                  decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 5), 
                  decolate_number(counts[COUNT_INDEX.BONUS], 2),
@@ -233,13 +251,18 @@ def output_for_xfiles(counts):
                  bonus_rate, 
                  chain,
                  decolate_number(counts[COUNT_INDEX.SBONUS], 4),
-                 sbonus_rate)
+                 sbonus_rate,
+                 decolate_number(counts[COUNT_INDEX_XFILES_XR], 2))
 
 
 if __name__ == '__main__':
   icounter_table= {
-    'stealth' : ICounter(None, None, output_for_stealth),
-    'xfiles'  : ICounter(None, None, output_for_xfiles),
+    'stealth' : ICounter(to_on_default, 
+                         to_off_default, 
+                         output_for_stealth),
+    'xfiles'  : ICounter(to_on_xfiles, 
+                         to_off_default, 
+                         output_for_xfiles),
   }
   icounters = [None] * N_BITS_GROUP
 
