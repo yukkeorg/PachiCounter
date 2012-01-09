@@ -277,8 +277,10 @@ def output_for_xfiles(counts):
   }
 
   fmt = u'<span font-desc="Ricty Bold 14">' \
-        u'<span size="small"><u>Now</u></span>\n<span size="x-large">{count}</span>\n' \
-        u'<span size="small"><u>Total</u></span>\n<span size="large">{totalcount}</span>({normalcount}+{uzxrcount})\n'
+        u'<span size="small"><u>Now</u></span>\n' \
+        u'<span size="x-large">{count}</span>\n' \
+        u'<span size="small"><u>Total</u></span>\n' \
+        u'<span size="large">{totalcount}</span>({normalcount}+{uzxrcount})\n'
   if counts[COUNT_INDEX.CHAIN] > 1:
     fmt = fmt + u'<span size="small"><u>XTRA-RUSH</u></span>{xr_chain}'
   else:
