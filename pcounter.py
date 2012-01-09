@@ -74,13 +74,19 @@ else:
   CHAR_ENCODE = 'utf-8'
 
 
+class PCounterError(Exception): pass
+class PCounterInitFailed(PCounterError): pass
+
 class PCounter(object):
-  def __init__(self, rcfile=None, outputfile=None, icounters=None):
+  def __init__(self, rcfile=None, outputfile=None, icounters=None, isreset=False, isaddnull=True):
     self.rcfile = rcfile if rcfile else RC_FILE 
     self.usbio = None
     self.counts = [ [0] * N_COUNTS for i in range(N_BITS_GROUP) ]
     self.onFlag = [ [ False ] * N_BITS for i in range(N_BITS_GROUP) ]
     self.icounters = icounters if icounters else ([None] * N_BITS_GROUP)
+    self.isaddnull = isaddnull
+    self.isreset = isreset
+    self.prev_outputstrs = [""] * N_BITS_GROUP
 
   def init_device(self):
     self.usbio = pyusbio.USBIO()
@@ -105,51 +111,57 @@ class PCounter(object):
       logger.error(u"カウンタ値を読み込めませんでした。原因：{0}".format(e.message))
       return False
 
-
-  def countup(self):
+  def get_usbio_data(self):
     port0, port1 = self.usbio.send2read()
-    port = (port1 << 8) + port0 
-    # グループ単位で処理
-    for i in xrange(N_BITS_GROUP):
-      bitgroup = (port >> (N_BITS * i)) & BITMASK
-      counts = self.counts[i]
-      flags = self.onFlag[i]
-      icounter = self.icounters[i]
+    port = (port1 << 8) + port0
+    return port
 
-      for j in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
-        if (bitgroup & (1 << j)) != 0:
+  def countup(self, port):
+    # グループ単位で処理
+    for grp in xrange(N_BITS_GROUP):
+      bitgroup = (port >> (N_BITS * grp)) & BITMASK
+      counts = self.counts[grp]
+      flags = self.onFlag[grp]
+      icounter = self.icounters[grp]
+
+      for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
+        if (bitgroup & (1 << bit)) != 0:
           # 状態がOff→Onになるとき
-          if not flags[j]:
-            flags[j] = True
+          if not flags[bit]:
+            flags[bit] = True
             if icounter and callable(icounter.func_to_on):
-              icounter.func_to_on(j, bitgroup, counts)
+              icounter.func_to_on(bit, bitgroup, counts)
         else:
           # 状態がOn→Offになるとき
-          if flags[j]:
-            flags[j] = False
+          if flags[bit]:
+            flags[bit] = False
             if icounter and callable(icounter.func_to_off):
-              icounter.func_to_off(j, bitgroup, counts)
+              icounter.func_to_off(bit, bitgroup, counts)
 
-  def mainloop(self, reset=False, nonull=False):
+  def display(self):
+    for grp in range(N_BITS_GROUP):
+      if self.icounters[grp] and callable(self.icounters[grp].func_output):
+        countstr = self.icounters[grp].func_output(self.counts[grp])
+        if countstr != self.prev_outputstrs[grp]:
+          self.prev_outputstrs[grp] = countstr
+          sys.stdout.write(countstr.encode(CHAR_ENCODE))
+          if self.isaddnull:
+            sys.stdout.write("\x00")
+          sys.stdout.flush()
+
+  def mainloop(self):
     self.init_device()
-    if not reset:
+    if not self.isreset:
       if not self.load():
-        return 1
+        raise PCounterInitFailed
     try:
       while True:
-        self.countup()
-        for i in range(N_BITS_GROUP):
-          if self.icounters[i] and callable(self.icounters[i].func_output):
-            countstr = self.icounters[i].func_output(self.counts[i])
-            sys.stdout.write(countstr.encode(CHAR_ENCODE))
-        if not nonull:
-          sys.stdout.write("\x00")
-        sys.stdout.flush()
+        port = self.get_usbio_data()
+        self.countup(port)
+        self.display()
         time.sleep(WAIT_TIME)
     except KeyboardInterrupt:
       pass
-    finally:
-      self.save()
     return 0
 
 
@@ -159,8 +171,7 @@ def to_on_default(cbittype, bitgroup, counts):
     counts[COUNT_INDEX.TOTALCOUNT] += 1
   if cbittype == USBIO_BIT.BONUS:
     counts[COUNT_INDEX.BONUS] += 1
-    # チャンス中なら
-    if bitgroup & (1 << USBIO_BIT.CHANCE):
+    if bitgroup & (1 << USBIO_BIT.CHANCE):   # チャンス中なら
       counts[COUNT_INDEX.CHAIN] += 1
   if cbittype == USBIO_BIT.CHANCE:
     counts[COUNT_INDEX.CHANCE] += 1
@@ -175,22 +186,6 @@ def to_off_default(cbittype, bitgroup, counts):
     counts[COUNT_INDEX.CHAIN] = 0
 
 
-def gen_bonusrate(total, now):
-  try:
-    bonus_rate = "1/{0:.1f}".format(float(total)/now)
-  except ZeroDivisionError:
-    bonus_rate = "1/-.-"
-  return bonus_rate
-
-def gen_chain(n_chain, suffix=None):
-  if suffix is None:
-    suffix = "Chain(s)"
-  chain = ""
-  if n_chain > 0:
-    chain = '\n<span size="x-large">{0:3}</span> {1}'.format(n_chain, suffix)
-  return chain
-
-
 def decolate_number(num, digit, zero_color=None):
   if zero_color is None:
     zero_color = "#888888"
@@ -201,14 +196,33 @@ def decolate_number(num, digit, zero_color=None):
   return '<span color="{0}">'.format(zero_color) + s[0:idx] + '</span>' + s[idx:]
 
 
+def gen_bonusrate(total, now):
+  try:
+    bonus_rate = '<span size="x-small">1/</span>{0:.1f}'.format(float(total)/now)
+  except ZeroDivisionError:
+    bonus_rate = '<span size="x-small">1/</span>-.-'
+  return bonus_rate
+
+
+def gen_chain(n_chain, suffix=None):
+  if suffix is None:
+    suffix = "Chain(s)"
+  chain = ""
+  if n_chain > 0:
+    chain = '\n<span size="x-large">{0}</span> {1}'.format(decolate_number(n_chain, 3), suffix)
+  return chain
+
+
+
+
 ### FOR CR STEALTH
 def output_for_stealth(counts):
   bonus_rate = gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], counts[COUNT_INDEX.BONUS])
   chain = gen_chain(counts[COUNT_INDEX.CHAIN], "Lock On!")
-  fmt = u'<span font-desc="Ricty Bold 15">Games:\n' \
+  fmt = u'<span font-desc="Ricty Bold 15"><u>Games</u>\n' \
         u'<span size="x-large">{0}</span>({1})\n' \
-        u'BonusCount:\n' \
-        u'<span size="x-large">{2}</span>/{3} ({4}){5}</span>'
+        u'<u>Bonus</u>\n' \
+        u'<span size="large">{2}</span>/{3} ({4}){5}</span>'
   return fmt.format(decolate_number(counts[COUNT_INDEX.COUNT], 4),
                  decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 5), 
                  decolate_number(counts[COUNT_INDEX.BONUS], 2), 
@@ -218,11 +232,17 @@ def output_for_stealth(counts):
 
 ### FOR CR X-FILES
 COUNT_INDEX_XFILES_XR = COUNT_INDEX.USER
+COUNT_INDEX_XFILES_NORMALGAMES = COUNT_INDEX.USER + 1
+COUNT_INDEX_XFILES_CHANCEGAMES = COUNT_INDEX.USER + 2
 
 def to_on_xfiles(cbittype, bitgroup, counts):
   if cbittype == USBIO_BIT.COUNT:
     counts[COUNT_INDEX.COUNT] += 1
     counts[COUNT_INDEX.TOTALCOUNT] += 1
+    if bitgroup & (1 << USBIO_BIT.CHANCE):
+      counts[COUNT_INDEX_XFILES_CHANCEGAMES] += 1
+    else:
+      counts[COUNT_INDEX_XFILES_NORMALGAMES] += 1
   if cbittype == USBIO_BIT.BONUS:
     counts[COUNT_INDEX.BONUS] += 1
     if bitgroup & (1 << USBIO_BIT.CHANCE):
@@ -234,25 +254,40 @@ def to_on_xfiles(cbittype, bitgroup, counts):
   if cbittype == USBIO_BIT.SBONUS:
     counts[COUNT_INDEX.SBONUS] += 1
 
+def to_off_xfiles(cbittype, bitgroup, counts):
+  if cbittype == USBIO_BIT.BONUS:
+    counts[COUNT_INDEX.COUNT] = 0
+  if cbittype == USBIO_BIT.CHANCE:
+    counts[COUNT_INDEX.CHAIN] = 0
   
 def output_for_xfiles(counts):
-  bonus_rate = gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], counts[COUNT_INDEX.BONUS])
-  sbonus_rate = gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], counts[COUNT_INDEX.SBONUS])
-  chain = gen_chain(counts[COUNT_INDEX.CHAIN] - 1)
+  data_table = {
+     'count':       decolate_number(counts[COUNT_INDEX.COUNT], 4), 
+     'totalcount':  decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 5), 
+     'bonuscount':  decolate_number(counts[COUNT_INDEX.SBONUS], 3),
+     'uzcount':     decolate_number(counts[COUNT_INDEX.CHANCE], 3), 
+     'reserved':    decolate_number(counts[COUNT_INDEX.BONUS], 3),
+     'xrcount':     decolate_number(counts[COUNT_INDEX_XFILES_XR], 3),
+     'normalcount': decolate_number(counts[COUNT_INDEX_XFILES_NORMALGAMES], 4),
+     'uzxrcount':   decolate_number(counts[COUNT_INDEX_XFILES_CHANCEGAMES], 4),
+     'xr_rate':     gen_bonusrate(counts[COUNT_INDEX_XFILES_NORMALGAMES], counts[COUNT_INDEX_XFILES_XR]), 
+     'uz_rate':     gen_bonusrate(counts[COUNT_INDEX_XFILES_NORMALGAMES], counts[COUNT_INDEX.CHANCE]), 
+     'bonus_rate':  gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], counts[COUNT_INDEX.SBONUS]),
+     'xr_chain':    gen_chain(counts[COUNT_INDEX.CHAIN] - 1),
+  }
 
-  fmt = u'<span font-desc="Ricty Bold 15">GAMES\n' \
-        u'<span size="x-large">{0}</span>/{1}\n' \
-        u'BONUS(XR/UZ/ALL):\n' \
-        u'<span size="large">{8}/{3}/{6}</span>{5}</span>'
-  return  fmt.format(decolate_number(counts[COUNT_INDEX.COUNT], 4), 
-                 decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 5), 
-                 decolate_number(counts[COUNT_INDEX.BONUS], 2),
-                 decolate_number(counts[COUNT_INDEX.CHANCE], 2), 
-                 bonus_rate, 
-                 chain,
-                 decolate_number(counts[COUNT_INDEX.SBONUS], 4),
-                 sbonus_rate,
-                 decolate_number(counts[COUNT_INDEX_XFILES_XR], 2))
+  fmt = u'<span font-desc="Ricty Bold 14">' \
+        u'<span size="small"><u>Now</u></span>\n<span size="x-large">{count}</span>\n' \
+        u'<span size="small"><u>Total</u></span>\n<span size="large">{totalcount}</span>({normalcount}+{uzxrcount})\n'
+  if counts[COUNT_INDEX.CHAIN] > 1:
+    fmt = fmt + u'<span size="small"><u>XTRA-RUSH</u></span>{xr_chain}'
+  else:
+    fmt = fmt + u'<span size="small"><u>Bonus</u></span>\n.XR:<span size="large">{xrcount}</span>({xr_rate})\n.UZ:<span size="large">{uzcount}</span>({uz_rate})\nALL:<span size="large">{bonuscount}</span>({bonus_rate})'
+  fmt = fmt + u'</span>'
+
+  return fmt.format(**data_table)
+
+
 
 
 if __name__ == '__main__':
@@ -261,23 +296,22 @@ if __name__ == '__main__':
                          to_off_default, 
                          output_for_stealth),
     'xfiles'  : ICounter(to_on_xfiles, 
-                         to_off_default, 
+                         to_off_xfiles, 
                          output_for_xfiles),
   }
-  icounters = [None] * N_BITS_GROUP
 
   parse = optparse.OptionParser()
   parse.add_option("-r", "--reset", dest="reset", action="store_true")
-  parse.add_option("-n", "--nonull", dest="nonull", action="store_true")
   parse.add_option("-t", "--types", dest="types")
   (opt, args) = parse.parse_args()
 
+  icounters = [None] * N_BITS_GROUP
   if opt.types:
     _types = opt.types.split(',')
     l = min(len(_types), N_BITS_GROUP)
     icounters[0:l] = [ icounter_table.get(_types[i], None) for i in range(l) ]
 
-  pc = PCounter(icounters=icounters)
+  pc = PCounter(icounters=icounters, isreset=opt.reset)
 
   # シグナルハンドラ用メソッド
   def signal_handler(signum, stackframe):
@@ -286,6 +320,8 @@ if __name__ == '__main__':
       sys.exit(2)
   signal.signal(signal.SIGTERM, signal_handler)
 
-  ret = pc.mainloop(opt.reset, opt.nonull)
+  ret = pc.mainloop()
+  pc.save()
+
   sys.exit(ret)
 
