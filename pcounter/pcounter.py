@@ -123,3 +123,7 @@ def to_off_default(cbittype, iostatus, counts, history):
     counts[COUNT_INDEX.CHAIN] = 0
 
 
+def output_default(counts, history):
+  pass
+
+
