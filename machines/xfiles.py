@@ -34,10 +34,10 @@ def to_on(cbittype, bitgroup, counts, history):
     counts[pcounter.COUNT_INDEX.SBONUS] += 1
 
 def to_off(cbittype, bitgroup, counts, history):
-  if cbittype == USBIO_BIT.BONUS:
-    counts[COUNT_INDEX.COUNT] = 0
-  if cbittype == USBIO_BIT.CHANCE:
-    counts[COUNT_INDEX.CHAIN] = 0
+  if cbittype == pcounter.USBIO_BIT.BONUS:
+    counts[pcounter.COUNT_INDEX.COUNT] = 0
+  if cbittype == pcounter.USBIO_BIT.CHANCE:
+    counts[pcounter.COUNT_INDEX.CHAIN] = 0
   
 def output(counts, history):
   data_table = {
@@ -52,9 +52,9 @@ def output(counts, history):
      'xr_rate':     util.gen_bonusrate(counts[COUNT_INDEX_XFILES_NORMALGAMES], 
                                        counts[COUNT_INDEX_XFILES_XR]), 
      'uz_rate':     util.gen_bonusrate(counts[COUNT_INDEX_XFILES_NORMALGAMES], 
-                                       counts[COUNT_INDEX.CHANCE]), 
-     'bonus_rate':  util.gen_bonusrate(counts[COUNT_INDEX.TOTALCOUNT], 
-                                       counts[COUNT_INDEX.SBONUS]),
+                                       counts[pcounter.COUNT_INDEX.CHANCE]), 
+     'bonus_rate':  util.gen_bonusrate(counts[pcounter.COUNT_INDEX.TOTALCOUNT], 
+                                       counts[pcounter.COUNT_INDEX.SBONUS]),
      'xr_chain':    util.gen_chain(counts[pcounter.COUNT_INDEX.CHAIN] - 1),
      'history':     util.gen_history(history, 5),
   }

@@ -33,8 +33,8 @@ def gen_chain(n_chain, suffix=None):
 
 
 def gen_history(history, n):
+  a = []
   if history and len(history) > 0:
-    a = []
     n = min(n, 5)
     for h in list(reversed(history))[0:n]:
       a.append(u'{1}<span size="small">({0})</span>'.format(*h))

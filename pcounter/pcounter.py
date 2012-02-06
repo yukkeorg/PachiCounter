@@ -37,7 +37,7 @@ class PCounter(object):
               counterif=None, isreset=False, isaddnull=True,
               outputcharset=None):
     self.rcfile = rcfile
-    self.couterif = counterif
+    self.counterif = counterif
     self.isaddnull = isaddnull
     self.isreset = isreset
     self.output = output or sys.stdout
@@ -74,18 +74,18 @@ class PCounter(object):
         # 状態がOff→Onになるとき
         if not self._switch[bit]:
           self._switch[bit] = True
-          if self.couterif and callable(self.couterif.func_to_on):
-            self.couterif.func_to_on(bit, iostatus, self.counts, self.history)
+          if self.counterif and callable(self.counterif.func_to_on):
+            self.counterif.func_to_on(bit, port, self.counts, self.history)
       else:
         # 状態がOn→Offになるとき
         if self._switch[bit]:
           self._switch[bit] = False
-          if self.icounter and callable(self.icounter.func_to_off):
-            self.icounter.func_to_off(bit, iostatus, self.counts, self.history)
+          if self.counterif and callable(self.counterif.func_to_off):
+            self.counterif.func_to_off(bit, port, self.counts, self.history)
 
   def display(self):
-    if self.couterif and callable(self.couterif.func_output):
-      countstr = self.couterif.func_output(self.counts, self.history)
+    if self.counterif and callable(self.counterif.func_output):
+      countstr = self.counterif.func_output(self.counts, self.history)
       if countstr != self._prev_outputstrs:
         self._prev_outputstrs = countstr
         self.output.write(countstr.encode(self.outputcharset))
