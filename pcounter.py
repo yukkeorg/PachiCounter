@@ -24,25 +24,35 @@ sys.path.insert(0, BASEDIR)
 
 from pcounter import pcounter, hwreciever
 
-WAIT_TIME = 0.1    # sec
+INTERVAL = 0.1    # sec
 RC_FILE = os.path.expanduser("~/.pcounterrc")
 
 
-def create_counterif_table():
-  counterif_table = {}
-  modname_list = []
-  for fname in os.listdir(os.path.join(BASEDIR, "machines")):
-    if fname.endswith(".py") and not fname.startswith("__init__"):
-      modname = fname[:-3]
-      try:
-        mods = __import__("machines."+modname, globals(), locals(), [], -1)
-        if callable(mods.__dict__[modname].init):
-          ic = mods.__dict__[modname].init()
-          if isinstance(ic, pcounter.ICounter):
-            counterif_table[ic.name] = ic
-      except ImportError:
-        pass
-  return counterif_table
+class CounterIfLoader(object):
+  def __init__(self, location=None):
+    self.location = location or "machines"
+    self._mmodules = None
+    self._load()
+
+  def _load(self):
+    """ machines ディレクトリから、機種別の処理を動的に読み込みます。
+    """
+    modnames = []
+    for fname in os.listdir(os.path.join(BASEDIR, self.location)):
+      if fname.endswith(".py") and not fname.startswith("__init__"):
+        modnames.append(fname[:-3])
+    self._mmodules = __import__(self.location, globals(), locals(), modnames, -1)
+
+  def get(self, modname):
+    if modname.startswith('__'):
+      return None
+
+    mod = self._mmodules.__dict__.get(modname)
+    if mod and callable(mod.init):
+      ic = mod.init()
+      if isinstance(ic, pcounter.ICounter):
+        return ic
+    return None
 
 
 def commandline_parse():
@@ -55,16 +65,15 @@ def commandline_parse():
 def main():
   opt, args = commandline_parse()
 
-  icounter_table = create_counterif_table()
-  print(icounter_table)
-  counterif = icounter_table.get(opt.type, None)
-  if counterif is None:
-    logger.error(u"--type オプションが指定されていません.")
+  loader = CounterIfLoader()
+  cif = loader.get(opt.type)
+  if cif is None:
+    logger.error(u"--type オプションが指定されていないか、指定した内容が間違っています.")
     return
 
   hwr = hwreciever.HwReciever()
   hwr.init()
-  pc = pcounter.PCounter(counterif=counterif, 
+  pc = pcounter.PCounter(counterif=cif, 
                          rcfile=RC_FILE,
                          isreset=opt.reset)
 
@@ -78,8 +87,9 @@ def main():
   try:
     while True:
       port = hwr.get_port_value()
-      pc.do(port)
-      time.sleep(WAIT_TIME)
+      pc.countup(port)
+      pc.display()
+      time.sleep(INTERVAL)
   except KeyboardInterrupt:
     pass
 

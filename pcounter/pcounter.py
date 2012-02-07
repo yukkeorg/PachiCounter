@@ -97,6 +97,7 @@ class PCounter(object):
     for i in len(self.counts):
       self.counts[i] = 0
 
+
   def do(self, port):
     self.countup(port)
     self.display()
