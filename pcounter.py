@@ -74,7 +74,7 @@ def main():
   hwr.init()
 
   pc = pcounter.PCounter(cif, RC_FILE)
-  pc.load_rc(opt.isreset)
+  pc.load_rc(opt.reset)
 
   # シグナルハンドラ
   def signal_handler(signum, stackframe):
