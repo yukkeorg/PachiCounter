@@ -44,14 +44,12 @@ class CounterIfLoader(object):
     self._mmodules = __import__(self.location, globals(), locals(), modnames, -1)
 
   def get(self, modname):
-    if modname.startswith('__'):
-      return None
-
-    mod = self._mmodules.__dict__.get(modname)
-    if mod and callable(mod.init):
-      ic = mod.init()
-      if isinstance(ic, pcounter.ICounter):
-        return ic
+    if modname and not modname.startswith('__'):
+      mod = self._mmodules.__dict__.get(modname)
+      if mod and callable(mod.init):
+        ic = mod.init()
+        if isinstance(ic, pcounter.ICounter):
+          return ic
     return None
 
 
@@ -68,20 +66,21 @@ def main():
   loader = CounterIfLoader()
   cif = loader.get(opt.type)
   if cif is None:
-    logger.error(u"--type オプションが指定されていないか、指定した内容が間違っています.")
+    logger.error(u"--type オプションが指定されていないか、"
+                 u"指定した内容が間違っています.")
     return
 
   hwr = hwreciever.HwReciever()
   hwr.init()
-  pc = pcounter.PCounter(counterif=cif, 
-                         rcfile=RC_FILE,
-                         isreset=opt.reset)
+
+  pc = pcounter.PCounter(cif, RC_FILE)
+  pc.load_rc(opt.isreset)
 
   # シグナルハンドラ
   def signal_handler(signum, stackframe):
     if signum == signal.SIGTERM:
-      pc.save()
-      sys.exit(2)
+      pc.save_rc()
+      sys.exit(0)
   signal.signal(signal.SIGTERM, signal_handler)
 
   try:
@@ -92,9 +91,8 @@ def main():
       time.sleep(INTERVAL)
   except KeyboardInterrupt:
     pass
-
-  pc.save()
-  sys.exit(0)
+  finally:
+    pc.save_rc()
 
 if __name__ == '__main__':
   main()

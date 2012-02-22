@@ -33,13 +33,11 @@ class ICounter(object):
 
 
 class PCounter(object):
-  def __init__(self, rcfile=None, output=None, 
-              counterif=None, isreset=False, isaddnull=True,
-              outputcharset=None):
+  def __init__(self, counterif, rcfile, 
+               isaddnull=True, output=None, outputcharset=None):
     self.rcfile = rcfile
     self.counterif = counterif
     self.isaddnull = isaddnull
-    self.isreset = isreset
     self.output = output or sys.stdout
     self.outputcharset = outputcharset or 'utf-8'
 
@@ -49,7 +47,7 @@ class PCounter(object):
     self._prev_outputstrs = "" 
 
 
-  def save(self):
+  def save_rc(self):
     try:
       with open(self.rcfile, "wb") as f:
         pickle.dump(self.counts, f, -1)
@@ -57,7 +55,9 @@ class PCounter(object):
     except IOError, e:
       logger.error(u"カウンタ値が保存できませんでした。原因：{0}".format(e.message))
 
-  def load(self):
+  def load_rc(self, isreset):
+    if isreset:
+      return
     try:
       with open(self.rcfile, "rb") as f:
         self.counts = pickle.load(f)
@@ -96,11 +96,6 @@ class PCounter(object):
   def reset_counter(self):
     for i in len(self.counts):
       self.counts[i] = 0
-
-
-  def do(self, port):
-    self.countup(port)
-    self.display()
 
 
 def to_on_default(cbittype, iostatus, counts, history):
