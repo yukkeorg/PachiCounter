@@ -49,8 +49,8 @@ class PCounter(object):
   def save_rc(self):
     try:
       with open(self.rcfile, "wb") as f:
-        pickle.dump(self.counts, f, -1)
-        pickle.dump(self.history, f, -1)
+        pickle.dump(self.counts, f, 2)
+        pickle.dump(self.history, f, 2)
     except IOError as e:
       logger.error("カウンタ値が保存できませんでした。原因：{0}".format(e.message))
 
