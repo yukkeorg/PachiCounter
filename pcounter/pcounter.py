@@ -1,9 +1,8 @@
 # coding: utf-8
 
-import os
+
 import sys
 import pickle
-import json
 import logging
 logger = logging.getLogger("PCounter")
 
@@ -52,8 +51,8 @@ class PCounter(object):
       with open(self.rcfile, "wb") as f:
         pickle.dump(self.counts, f, -1)
         pickle.dump(self.history, f, -1)
-    except IOError, e:
-      logger.error(u"カウンタ値が保存できませんでした。原因：{0}".format(e.message))
+    except IOError as e:
+      logger.error("カウンタ値が保存できませんでした。原因：{0}".format(e.message))
 
   def load_rc(self, isreset):
     if isreset:
@@ -63,8 +62,8 @@ class PCounter(object):
         self.counts = pickle.load(f)
         self.history = pickle.load(f)
       return True
-    except IOError, e:
-      logger.error(u"カウンタ値を読み込めませんでした。原因：{0}".format(e.message))
+    except IOError as e:
+      logger.error("カウンタ値を読み込めませんでした。原因：{0}".format(e.message))
       return False
 
   def countup(self, port):
@@ -88,7 +87,8 @@ class PCounter(object):
       countstr = self.counterif.func_output(self.counts, self.history)
       if countstr != self._prev_outputstrs:
         self._prev_outputstrs = countstr
-        self.output.write(countstr.encode(self.outputcharset))
+        #self.output.write(countstr.encode(self.outputcharset))
+        self.output.write(countstr)
         if self.isaddnull:
           self.output.write("\x00")
         self.output.flush()

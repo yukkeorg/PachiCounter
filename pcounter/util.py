@@ -1,7 +1,7 @@
 # coding: utf-8
 
 def enum(*seq, **named):
-  enums = dict(zip(seq, range(len(seq))), **named)
+  enums = dict(list(zip(seq, list(range(len(seq))))), **named)
   return type('Enum', (), enums)
 
 
@@ -37,6 +37,6 @@ def gen_history(history, n):
   if history and len(history) > 0:
     n = min(n, 5)
     for h in list(reversed(history))[0:n]:
-      a.append(u'{1}<span size="small">({0})</span>'.format(*h))
-  return u' '.join(a)
+      a.append('{1}<span size="small">({0})</span>'.format(*h))
+  return ' '.join(a)
 

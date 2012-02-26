@@ -59,22 +59,22 @@ def output(counts, history):
      'history':     util.gen_history(history, 2),
   }
 
-  fmt = (u'<span font-desc="Ricty Bold 14">' 
-         u'<span size="small"><u>Now</u></span>\n' 
-         u'<span size="x-large">{count}</span>\n')
+  fmt = ('<span font-desc="Ricty Bold 14">' 
+         '<span size="small"><u>Now</u></span>\n' 
+         '<span size="x-large">{count}</span>\n')
   if counts[pcounter.COUNT_INDEX.CHAIN] > 1:
-    add_fmt = u'<span size="small"><u>XTRA-RUSH</u></span>{xr_chain}'
+    add_fmt = '<span size="small"><u>XTRA-RUSH</u></span>{xr_chain}'
   else:
-    add_fmt = (u'<span size="small"><u>Total</u></span>\n'
-               u'<span size="large">{totalcount}</span>\n'
-               u'<span size="small">{normalcount}+{uzxrcount}</span>\n'
-               u'<span size="small"><u>Bonus</u></span>\n'
-               u'<span size="large">{bonuscount}</span><span size="small">({bonus_rate})</span>\n'
-               u'UZ:<span size="large">{uzcount}</span><span size="small">({uz_rate})</span>\n'
-               u'XR:<span size="large">{xrcount}</span><span size="small">({xr_rate})</span>\n'
-               u'<span size="small"><u>History</u></span>\n'
-               u'{history}')
-  fmt = fmt + add_fmt + u'</span>'
+    add_fmt = ('<span size="small"><u>Total</u></span>\n'
+               '<span size="large">{totalcount}</span>\n'
+               '<span size="small">{normalcount}+{uzxrcount}</span>\n'
+               '<span size="small"><u>Bonus</u></span>\n'
+               '<span size="large">{bonuscount}</span><span size="small">({bonus_rate})</span>\n'
+               'UZ:<span size="large">{uzcount}</span><span size="small">({uz_rate})</span>\n'
+               'XR:<span size="large">{xrcount}</span><span size="small">({xr_rate})</span>\n'
+               '<span size="small"><u>History</u></span>\n'
+               '{history}')
+  fmt = fmt + add_fmt + '</span>'
 
   return fmt.format(**data_table)
   

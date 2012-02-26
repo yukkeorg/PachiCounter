@@ -7,7 +7,7 @@
 # This program is under the 2-clauses BSD License.
 # For details, please see LICENSE file.
 
-from __future__ import print_function
+
 
 import os
 import sys
@@ -66,8 +66,7 @@ def main():
   loader = CounterIfLoader()
   cif = loader.get(opt.type)
   if cif is None:
-    logger.error(u"--type オプションが指定されていないか、"
-                 u"指定した内容が間違っています.")
+    logger.error("--type option is not specified or missing.")
     return
 
   hwr = hwreciever.HwReciever()
