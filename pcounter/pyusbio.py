@@ -98,7 +98,7 @@ class USBIO(object):
       data = self.device.read(self.inEpAddr, cmdsize, timeout=self._timeout)
       if data[0] != cmd[0] or data[cmdsize-1] != cmd[cmdsize-1]:
         raise ValueError("Different recived data.")
-      return data[0:cmdsize-1]
+      return data[1:cmdsize-1]
     else:
       return []
 
