@@ -3,13 +3,14 @@ Pachinko PC Counter
 
 Pachinko Counter は、パチンコ台の外部情報出力端子から出力される信号を、USB-IO経由で受け取り、現在の回転数や確率などを出力するいわゆるカウンターです。
 
-*注意事項このソフトウエアは私が作成した webcamstudio (https://github.com/yukkeorg/simplebroadcast4linux/blob/master/tool/webcamcomposer)内で子プロセスとして動作することを前提として作成されているため、見やすいGUIが表示されたりしませんので、ご注意下さい。*
+注意事項:**このソフトウエアは私が作成した webcamstudio ( https://github.com/yukkeorg/simplebroadcast4linux/blob/master/tool/webcamcomposer )内の子プロセスとして動作することを前提として作成されているため、見やすいGUIが表示されたりしませんので、ご注意下さい。**
 
 必要なハードウエア
 -----------------
 - USB-IO 2.0
   - http://km2net.com/usb-io2.0/index.shtml
   - http://akizukidenshi.com/catalog/g/gM-05131/
+
 
 必要なソフトウエア
 -----------------
@@ -32,5 +33,5 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
 ライセンス
 ----------
-2-clause BSD Licence.
+2-clause BSD Licence.  
 詳しくは、LICENSE.txtを参照してください。
