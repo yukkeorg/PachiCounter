@@ -1,6 +1,5 @@
 # coding: utf-8
 
-
 import sys
 import pickle
 import logging
@@ -21,9 +20,9 @@ BITMASK = (1 << USBIO_BIT.LAST) - 1
 BITSHIFT = USBIO_BIT.LAST
 
 class PCounterError(Exception): pass
-class PCounterInitFailed(PCounterError): pass
 
 class ICounter(object):
+  """ コールバックインターフェース """
   def __init__(self, name=None, func_to_on=None, func_to_off=None, func_output=None):
     self.name = name
     self.func_to_on = func_to_on
@@ -43,7 +42,7 @@ class PCounter(object):
     self.counts = [0] * N_COUNTS 
     self.history = []
     self._switch = [ False ] * N_BITS 
-    self._prev_outputstrs = "" 
+    self._prev_outputstr = "" 
 
 
   def save_rc(self):
@@ -51,6 +50,7 @@ class PCounter(object):
       with open(self.rcfile, "wb") as f:
         pickle.dump(self.counts, f, 2)
         pickle.dump(self.history, f, 2)
+        f.close()
     except IOError as e:
       logger.error("カウンタ値が保存できませんでした。原因：{0}".format(e.message))
 
@@ -61,6 +61,7 @@ class PCounter(object):
       with open(self.rcfile, "rb") as f:
         self.counts = pickle.load(f)
         self.history = pickle.load(f)
+        f.close()
       return True
     except IOError as e:
       logger.error("カウンタ値を読み込めませんでした。原因：{0}".format(e.message))
@@ -70,13 +71,13 @@ class PCounter(object):
     for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
       checkbit = 1 << bit
       if port & checkbit:
-        # 状態がOff→Onになるとき
+        # 状態が0->1になるとき
         if not self._switch[bit]:
           self._switch[bit] = True
           if self.counterif and callable(self.counterif.func_to_on):
             self.counterif.func_to_on(bit, port, self.counts, self.history)
       else:
-        # 状態がOn→Offになるとき
+        # 状態が1->0になるとき
         if self._switch[bit]:
           self._switch[bit] = False
           if self.counterif and callable(self.counterif.func_to_off):
@@ -85,9 +86,8 @@ class PCounter(object):
   def display(self):
     if self.counterif and callable(self.counterif.func_output):
       countstr = self.counterif.func_output(self.counts, self.history)
-      if countstr != self._prev_outputstrs:
-        self._prev_outputstrs = countstr
-        #self.output.write(countstr.encode(self.outputcharset))
+      if countstr != self._prev_outputstr:
+        self._prev_outputstr = countstr
         self.output.write(countstr)
         if self.isaddnull:
           self.output.write("\x00")

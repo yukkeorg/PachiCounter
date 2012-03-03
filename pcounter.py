@@ -7,8 +7,6 @@
 # This program is under the 2-clauses BSD License.
 # For details, please see LICENSE file.
 
-
-
 import os
 import sys
 import optparse
@@ -56,6 +54,7 @@ class CounterIfLoader(object):
 def commandline_parse():
   parse = optparse.OptionParser()
   parse.add_option("-r", "--reset", dest="reset", action="store_true")
+  parse.add_option("-i", "--invert", dest="invert", action="store_true")
   parse.add_option("-t", "--type", dest="type")
   return parse.parse_args()
 
@@ -83,8 +82,10 @@ def main():
   signal.signal(signal.SIGTERM, signal_handler)
 
   try:
-    while True:
+    while 1:
       port = hwr.get_port_value()
+      if opt.invert:
+        port = ~port
       pc.countup(port)
       pc.display()
       time.sleep(INTERVAL)
