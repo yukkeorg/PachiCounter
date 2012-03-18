@@ -56,7 +56,7 @@ def output(counts, history):
      'bonus_rate':  util.gen_bonusrate(counts[pcounter.COUNT_INDEX.TOTALCOUNT], 
                                        counts[pcounter.COUNT_INDEX.SBONUS]),
      'xr_chain':    util.gen_chain(counts[pcounter.COUNT_INDEX.CHAIN] - 1),
-     'history':     util.gen_history(history, 2),
+     'history':     util.gen_history(history, 3, sep="\n", isfill=True),
   }
 
   fmt = ('<span font-desc="Ricty Bold 14">' 

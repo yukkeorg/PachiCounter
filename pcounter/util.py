@@ -32,11 +32,14 @@ def gen_chain(n_chain, suffix=None):
   return chain
 
 
-def gen_history(history, n):
+def gen_history(history, n, sep=" ", isfill=False):
   a = []
   if history and len(history) > 0:
     n = min(n, 5)
     for h in list(reversed(history))[0:n]:
       a.append('{1}<span size="small">({0})</span>'.format(*h))
-  return ' '.join(a)
+    if isfill:
+      for i in range(5):
+        a.append('')
+  return sep.join(a[:n])
 
