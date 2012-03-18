@@ -78,16 +78,19 @@ def main():
   def signal_handler(signum, stackframe):
     if signum == signal.SIGTERM:
       pc.save_rc()
-      sys.exit(0)
+      sys.exit(1)
   signal.signal(signal.SIGTERM, signal_handler)
 
   try:
+    prev_port = -1
     while 1:
       port = hwr.get_port_value()
-      if opt.invert:
-        port = ~port
-      pc.countup(port)
-      pc.display()
+      if port != prev_port:
+        prev_port = port
+        if opt.invert:
+          port = ~port
+        pc.countup(port)
+        pc.display()
       time.sleep(INTERVAL)
   except KeyboardInterrupt:
     pass

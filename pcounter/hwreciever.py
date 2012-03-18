@@ -11,7 +11,7 @@ class HwReciever(object):
   def init(self):
     self.usbio = pyusbio.USBIO()
     if not self.usbio.find_and_init():
-      raise HwRecieverError("USB-IOモジュールの初期化に失敗しました。")
+      raise HwRecieverError("Failed to initialize USB-IO 2.0 module.")
 
   def get_port_value(self):
     port0, port1 = self.usbio.send2read()

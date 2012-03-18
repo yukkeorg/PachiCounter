@@ -19,22 +19,39 @@ N_COUNTS = COUNT_INDEX.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
 BITSHIFT = USBIO_BIT.LAST
 
-class PCounterError(Exception): pass
 
 class ICounter(object):
   """ コールバックインターフェース """
   def __init__(self, name=None, func_to_on=None, func_to_off=None, func_output=None):
     self.name = name
-    self.func_to_on = func_to_on
-    self.func_to_off = func_to_off
-    self.func_output = func_output
+    if callable(func_to_on):
+      self.func_to_on = func_to_on
+    else:
+      raise TypeError("func_to_on is not function.")
 
+    if callable(func_to_off):
+      self.func_to_off = func_to_off
+    else:
+      raise TypeError("func_to_off is not function.")
+
+    if callable(func_output):
+      self.func_output = func_output
+    else:
+      raise TypeError("func_output is not function.")
+
+
+
+
+class PCounterError(Exception): pass
 
 class PCounter(object):
   def __init__(self, counterif, rcfile, 
                isaddnull=True, output=None, outputcharset=None):
     self.rcfile = rcfile
-    self.counterif = counterif
+    if counterif and isinstance(counterif, ICounter):
+      self.counterif = counterif
+    else:
+      raise PCounterError("counterif is not ICounter instance.")
     self.isaddnull = isaddnull
     self.output = output or sys.stdout
     self.outputcharset = outputcharset or 'utf-8'
@@ -42,7 +59,6 @@ class PCounter(object):
     self.counts = [0] * N_COUNTS 
     self.history = []
     self._switch = [ False ] * N_BITS 
-    self._prev_outputstr = "" 
 
 
   def save_rc(self):
@@ -71,27 +87,23 @@ class PCounter(object):
     for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
       checkbit = 1 << bit
       if port & checkbit:
-        # 状態が0->1になるとき
+        # 調査中ビットの状態が0->1になるとき
         if not self._switch[bit]:
           self._switch[bit] = True
-          if self.counterif and callable(self.counterif.func_to_on):
-            self.counterif.func_to_on(bit, port, self.counts, self.history)
+          self.counterif.func_to_on(bit, port, self.counts, self.history)
       else:
-        # 状態が1->0になるとき
+        # 調査中ビットの状態が1->0になるとき
         if self._switch[bit]:
           self._switch[bit] = False
-          if self.counterif and callable(self.counterif.func_to_off):
-            self.counterif.func_to_off(bit, port, self.counts, self.history)
+          self.counterif.func_to_off(bit, port, self.counts, self.history)
 
   def display(self):
-    if self.counterif and callable(self.counterif.func_output):
-      countstr = self.counterif.func_output(self.counts, self.history)
-      if countstr != self._prev_outputstr:
-        self._prev_outputstr = countstr
-        self.output.write(countstr)
-        if self.isaddnull:
-          self.output.write("\x00")
-        self.output.flush()
+    countstr = self.counterif.func_output(self.counts, self.history)
+    self._prev_outputstr = countstr
+    self.output.write(countstr)
+    if self.isaddnull:
+      self.output.write("\x00")
+    self.output.flush()
 
   def reset_counter(self):
     for i in len(self.counts):
