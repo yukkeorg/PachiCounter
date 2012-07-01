@@ -8,16 +8,22 @@ logger = logging.getLogger("PCounter")
 from . import util
 
 
-USBIO_BIT = util.enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 
-                      'RESERVED1', 'RESERVED2', 'LAST')
-COUNT_INDEX = util.enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 
-                        'TOTALCOUNT', 'CHAIN', 'USER',
-                        LAST=20 )
+USBIO_BIT = util.enum(
+    'COUNT', 'BONUS', 'CHANCE', 'SBONUS', 
+    'RESERVED1', 'RESERVED2', 'LAST',
+)
+COUNT_INDEX = util.enum(
+    'COUNT', 'BONUS', 'CHANCE', 'SBONUS', 
+    'TOTALCOUNT', 'CHAIN', 'USER',
+     LAST=20 
+)
 
 N_BITS = USBIO_BIT.LAST
 N_COUNTS = COUNT_INDEX.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
 BITSHIFT = USBIO_BIT.LAST
+
+class PCounterError(Exception): pass
 
 
 class ICounter(object):
@@ -40,10 +46,6 @@ class ICounter(object):
       raise TypeError("func_output is not function.")
 
 
-
-
-class PCounterError(Exception): pass
-
 class PCounter(object):
   def __init__(self, counterif, rcfile, 
                isaddnull=True, output=None, outputcharset=None):
@@ -51,7 +53,8 @@ class PCounter(object):
     if counterif and isinstance(counterif, ICounter):
       self.counterif = counterif
     else:
-      raise PCounterError("counterif is not ICounter instance.")
+      raise TypeError("counterif is not ICounter instance.")
+
     self.isaddnull = isaddnull
     self.output = output or sys.stdout
     self.outputcharset = outputcharset or 'utf-8'
@@ -59,7 +62,6 @@ class PCounter(object):
     self.counts = [0] * N_COUNTS 
     self.history = []
     self._switch = [ False ] * N_BITS 
-
 
   def save_rc(self):
     try:
@@ -99,7 +101,6 @@ class PCounter(object):
 
   def display(self):
     countstr = self.counterif.func_output(self.counts, self.history)
-    self._prev_outputstr = countstr
     self.output.write(countstr)
     if self.isaddnull:
       self.output.write("\x00")
