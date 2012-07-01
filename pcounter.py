@@ -74,7 +74,7 @@ def main():
   pc = pcounter.PCounter(cif, RC_FILE)
   pc.load_rc(opt.reset)
 
-  # シグナルハンドラ
+  # シグナルハンドラ設定
   def signal_handler(signum, stackframe):
     if signum == signal.SIGTERM:
       pc.save_rc()
