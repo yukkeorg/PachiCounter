@@ -63,7 +63,9 @@ def output(counts, history):
          '<span size="small"><u>Now</u></span>\n' 
          '<span size="x-large">{count}</span>\n')
   if counts[pcounter.COUNT_INDEX.CHAIN] > 1:
-    add_fmt = '<span size="small"><u>XTRA-RUSH</u></span>{xr_chain}'
+    add_fmt = ('<span size="small"><u>XTRA-RUSH</u></span>{xr_chain}\n'
+               '<span size="small"><u>TotalBonus</u>\n{bonuscount}({bonus_rate})</span>\n')
+
   else:
     add_fmt = ('<span size="small"><u>Total</u></span>\n'
                '<span size="large">{totalcount}</span>\n'
