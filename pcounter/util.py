@@ -5,14 +5,26 @@ def enum(*seq, **named):
   return type('Enum', (), enums)
 
 
-def decolate_number(num, digit, zero_color=None):
+def bit_is_enable(val, bit):
+  return (val & (1 << bit))
+
+def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):
   if zero_color is None:
-    zero_color = "#888888"
-  s = "{{0:0{0}}}".format(digit).format(num)
-  idx = digit - len(str(num))
-  if idx < 1:
-    return s
-  return '<span color="{0}">'.format(zero_color) + s[0:idx] + '</span>' + s[idx:]
+    zero_color = '#888888'
+  last_zero_pos = min_disp_digit - len(str(num))
+  raw_num_str = '{{0:0{0}}}'.format(min_disp_digit).format(num)
+
+  num_str = raw_num_str[last_zero_pos:]
+  if num_color:
+    num_fmt = '<span color="{0}">{1}</span>'.format(num_color, num_str)
+  else:
+    num_fmt = num_str[:]
+
+  if last_zero_pos > 0:
+    return '<span color="{0}">{1}</span>{2}'.format(zero_color, 
+                                                    raw_num_str[0:last_zero_pos],
+                                                    num_fmt)
+  return num_fmt
 
 
 def gen_bonusrate(total, now):
@@ -34,12 +46,15 @@ def gen_chain(n_chain, suffix=None):
 
 def gen_history(history, n, sep=" ", isfill=False):
   a = []
-  if history and len(history) > 0:
+  if history:
     n = min(n, 5)
     for h in list(reversed(history))[0:n]:
-      a.append('{1}<span size="small">({0})</span>'.format(*h))
-    if isfill:
-      for i in range(5):
-        a.append('')
+      if h[0] is None:
+        a.append(str(h[1]))
+      else:
+        a.append('{1}<span size="small">({0})</span>'.format(*h))
+  if isfill:
+    for i in range(5):
+      a.append('')
   return sep.join(a[:n])
 
