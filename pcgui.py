@@ -39,11 +39,6 @@ pygtk.require('2.0')
 import gtk
 import glib
 
-import pygst
-pygst.require('0.10')
-import gst
-
-
 class StdoutReader(object):
   def __init__(self, cmd_and_args):
     self.cmd_and_args = cmd_and_args
@@ -179,4 +174,3 @@ if __name__ == "__main__":
   cm = PCounterGuiWindow(sys.argv[1:])
   gtk.gdk.threads_init()
   gtk.main()
-
