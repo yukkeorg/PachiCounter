@@ -9,6 +9,7 @@
 
 import os
 import sys
+import errno
 import optparse
 import signal
 import time
@@ -23,16 +24,16 @@ sys.path.insert(0, BASEDIR)
 from pcounter import pcounter, hwreciever
 
 INTERVAL = 0.1    # sec
-RC_FILE = os.path.expanduser("~/.pcounterrc")
+RC_DIR = os.path.expanduser("~/.pcounter.d")
 
 
 class CounterIfLoader(object):
   def __init__(self, location=None):
     self.location = location or "machines"
     self._mmodules = None
-    self._load()
+    self._load_machine_module()
 
-  def _load(self):
+  def _load_machine_module(self):
     """ machines ディレクトリから、機種別の処理を動的に読み込みます。
     """
     modnames = []
@@ -59,6 +60,15 @@ def commandline_parse():
   return parse.parse_args()
 
 
+def make_userconfigdir(d):
+  try:
+    os.makedirs(d)
+  except OSError as e:
+    if e.errno == errno.EEXIST:
+      pass
+    else:
+      raise
+  
 def main():
   opt, args = commandline_parse()
 
@@ -68,20 +78,25 @@ def main():
     logger.error("--type option is not specified or missing.")
     return
 
+  make_userconfigdir(RC_DIR)
+  rc_file = os.path.join(RC_DIR, opt.type)
+
   hwr = hwreciever.HwReciever()
   hwr.init()
 
-  pc = pcounter.PCounter(cif, RC_FILE)
+  pc = pcounter.PCounter(cif, rc_file)
   pc.load_rc(opt.reset)
 
   # シグナルハンドラ設定
   def signal_handler(signum, stackframe):
+    # Ctrl+C 受信
     if signum == signal.SIGTERM:
       pc.save_rc()
       sys.exit(1)
   signal.signal(signal.SIGTERM, signal_handler)
 
   try:
+    tick = 0
     prev_port = -1
     while 1:
       port = hwr.get_port_value()
@@ -92,6 +107,7 @@ def main():
         pc.countup(port)
         pc.display()
       time.sleep(INTERVAL)
+      tick += 1
   except KeyboardInterrupt:
     pass
   finally:
