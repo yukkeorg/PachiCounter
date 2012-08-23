@@ -10,7 +10,7 @@ from pcounter.pcounter import COUNT_INDEX, USBIO_BIT
 COUNT_INDEX_CHANCEGAMES = COUNT_INDEX.USER
 COUNT_INDEX_NORMALGAMES = COUNT_INDEX.USER + 1
 
-falldown_possibility = 1 / 338.5
+falldown_possibility = 1/338.5
 
 def init():
   return pcounter.ICounter("virusbreaker", to_on, to_off, output)
@@ -88,8 +88,7 @@ def output(counts, history):
            '<span size="small"><u>Games</u></span>\n' 
            '<span size="x-large">{nowgames}</span>/{normalgametotal}\n'
            '<span size="small"><u>Bonus</u></span>\n'
-           '<span size="large">{bonus}</span>/{firstbonus}\n'
-           '{firstbonus_rate}</span>')
+           '<span size="large">{bonus}</span>/{firstbonus} {firstbonus_rate}</span>')
 
   return fmt.format(**data_table)
   
