@@ -28,12 +28,11 @@ def to_on(cbittype, bitgroup, counts, history):
   if cbittype == USBIO_BIT.BONUS:
     counts[COUNT_INDEX.BONUS] += 1
     if bitgroup & (1 << USBIO_BIT.CHANCE):
-      if counts[COUNT_INDEX.COUNT] == 0:
-        history.append(('VAT', counts[COUNT_INDEX.COUNT]))
       counts[COUNT_INDEX.CHAIN] += 1
 
   if cbittype == USBIO_BIT.CHANCE:
     counts[COUNT_INDEX.CHANCE] += 1
+    history.append(('VAT', counts[COUNT_INDEX.COUNT]))
 
   if cbittype == USBIO_BIT.SBONUS:
     counts[COUNT_INDEX.SBONUS] += 1
