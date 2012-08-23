@@ -75,7 +75,7 @@ def output(counts, history):
        'vat'                 : t,
     })
 
-    fmt = ('<span font-desc="Zrnic Bold 15" color="#00ffff">'
+    fmt = ('<span color="#ffff00">'
            '<span size="large"><u>{vat} VAT</u></span>\n'
            'Games: <span size="x-large">{nowgames}</span>\n'
            'Chain: <span size="large">{chain}</span>\n'
@@ -83,11 +83,10 @@ def output(counts, history):
            '</span>') 
 
   else:
-    fmt = ('<span font-desc="Zrnic Bold 15">' 
-           '<span size="small"><u>Games</u></span>\n' 
+    fmt = ('<span size="small"><u>Games</u></span>\n' 
            '<span size="x-large">{nowgames}</span>/{normalgametotal}\n'
            '<span size="small"><u>Bonus</u></span>\n'
-           '<span size="large">{bonus}</span>/{firstbonus} {firstbonus_rate}</span>')
+           '<span size="large">{bonus}</span>/{firstbonus} {firstbonus_rate}')
 
   return fmt.format(**data_table)
   
