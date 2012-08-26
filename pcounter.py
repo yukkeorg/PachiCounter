@@ -21,13 +21,13 @@ logger.addHandler(logging.StreamHandler())
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASEDIR)
 
-from pcounter import pcounter, hwreciever
+from pcounter import pcounter, hwreceiver
 
 INTERVAL = 0.1    # sec
 RC_DIR = os.path.expanduser("~/.pcounter.d")
 
 
-class CounterIfLoader(object):
+class CounterInterfaceLoader(object):
   def __init__(self, location=None):
     self.location = location or "machines"
     self._mmodules = None
@@ -72,46 +72,39 @@ def make_userconfigdir(d):
 def main():
   opt, args = commandline_parse()
 
-  loader = CounterIfLoader()
+  make_userconfigdir(RC_DIR)
+  rc_file = os.path.join(RC_DIR, opt.type)
+ 
+  # ハードウエアレシーバオブジェクト作成
+  hwr = hwreceiver.HwReceiver()
+  hwr.init()
+
+  # 機種ごとのカウンタインタフェースをロード
+  loader = CounterInterfaceLoader()
   cif = loader.get(opt.type)
   if cif is None:
     logger.error("--type option is not specified or missing.")
     return
 
-  make_userconfigdir(RC_DIR)
-  rc_file = os.path.join(RC_DIR, opt.type)
-
-  hwr = hwreciever.HwReciever()
-  hwr.init()
-
-  pc = pcounter.PCounter(cif, rc_file)
-  pc.load_rc(opt.reset)
+  # PCounterオブジェクト作成
+  pc = pcounter.PCounter(hwr, cif, rc_file)
+  pc.loadrc(opt.reset)
+  pc.setinvert(opt.invert)
 
   # シグナルハンドラ設定
   def signal_handler(signum, stackframe):
     # Ctrl+C 受信
     if signum == signal.SIGTERM:
-      pc.save_rc()
+      pc.saverc()
       sys.exit(1)
   signal.signal(signal.SIGTERM, signal_handler)
 
   try:
-    tick = 0
-    prev_port = -1
-    while 1:
-      port = hwr.get_port_value()
-      if port != prev_port:
-        prev_port = port
-        if opt.invert:
-          port = ~port
-        pc.countup(port)
-        pc.display()
-      time.sleep(INTERVAL)
-      tick += 1
+    pc.loop(INTERVAL)
   except KeyboardInterrupt:
     pass
   finally:
-    pc.save_rc()
+    pc.saverc()
 
 if __name__ == '__main__':
   main()

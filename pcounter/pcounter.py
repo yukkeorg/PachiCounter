@@ -1,6 +1,7 @@
 # coding: utf-8
 
 import sys
+import time
 import pickle
 import logging
 logger = logging.getLogger("PCounter")
@@ -47,13 +48,16 @@ class ICounter(object):
 
 
 class PCounter(object):
-  def __init__(self, counterif, rcfile, 
+  def __init__(self, hwreceiver, counterif, rcfile, 
                isaddnull=True, output=None, outputcharset=None):
+    self.hwreceiver = hwreceiver
     self.rcfile = rcfile
     if counterif and isinstance(counterif, ICounter):
       self.counterif = counterif
     else:
       raise TypeError("counterif is not ICounter instance.")
+
+    self.invert = False
 
     self.isaddnull = isaddnull
     self.output = output or sys.stdout
@@ -63,7 +67,7 @@ class PCounter(object):
     self.history = []
     self._switch = [ False ] * N_BITS 
 
-  def save_rc(self):
+  def saverc(self):
     try:
       with open(self.rcfile, "wb") as f:
         pickle.dump(self.counts, f, 2)
@@ -72,7 +76,7 @@ class PCounter(object):
     except IOError as e:
       logger.error("カウンタ値が保存できませんでした。原因：{0}".format(e.message))
 
-  def load_rc(self, isreset):
+  def loadrc(self, isreset):
     if isreset:
       return
     try:
@@ -84,6 +88,12 @@ class PCounter(object):
     except IOError as e:
       logger.error("カウンタ値を読み込めませんでした。原因：{0}".format(e.message))
       return False
+
+  # Setter
+  def setinvert(self, invert):
+    if invert is not None:
+      self.invert = invert
+
 
   def countup(self, port):
     for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
@@ -109,6 +119,18 @@ class PCounter(object):
   def reset_counter(self):
     for i in len(self.counts):
       self.counts[i] = 0
+
+  def loop(self, interval):
+    prev_port = -1
+    while 1:
+      port = self.hwreceiver.get_port_value()
+      if port != prev_port:
+        prev_port = port
+        if self.invert: port = ~port
+        self.countup(port)
+        self.display()
+      time.sleep(interval)
+
 
 
 def to_on_default(cbittype, iostatus, counts, history):
