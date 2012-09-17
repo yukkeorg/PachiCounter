@@ -47,7 +47,7 @@ def to_off(cbittype, bitgroup, counts, history):
   
 def output(counts, history):
   data_table = {
-     'nowgames':          util.decolate_number(counts[COUNT_INDEX.COUNT], 3),
+     'nowgames':          util.decolate_number(counts[COUNT_INDEX.COUNT], 4),
      'normalgametotal':   util.decolate_number(counts[COUNT_INDEX_NORMALGAMES], 4),
      'chancegame':        util.decolate_number(counts[COUNT_INDEX_CHANCEGAMES], 4),
      'totalgames':        util.decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 4), 
@@ -77,13 +77,15 @@ def output(counts, history):
 
     fmt = ('<span color="#ffff00">'
            '<span size="large"><u>{vat} VAT</u></span>\n'
-           'Games: <span size="x-large">{nowgames}</span>\n'
-           'Chain: <span size="large">{chain}</span>\n'
+           '<span size="small"><u>Start</u></span>\n'
+           '<span size="x-large">{nowgames}</span>\n'
+           '<span size="small"><u>Chain</u></span>\n'
+           '<span size="large">{chain}</span>\n'
            '<span size="small">Continue Possibility : {continuepossibility}</span>'
            '</span>') 
 
   else:
-    fmt = ('<span size="small"><u>Games</u></span>\n' 
+    fmt = ('<span size="small"><u>Start</u></span>\n' 
            '<span size="x-large">{nowgames}</span>/{normalgametotal}\n'
            '<span size="small"><u>Bonus</u></span>\n'
            '<span size="large">{bonus}</span>/{firstbonus} {firstbonus_rate}')
