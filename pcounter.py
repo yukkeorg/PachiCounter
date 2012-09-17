@@ -40,7 +40,7 @@ class CounterInterfaceLoader(object):
     for fname in os.listdir(os.path.join(BASEDIR, self.location)):
       if fname.endswith(".py") and not fname.startswith("__init__"):
         modnames.append(fname[:-3])
-    self._mmodules = __import__(self.location, globals(), locals(), modnames, -1)
+    self._mmodules = __import__(self.location, globals(), locals(), modnames, 0)
 
   def get(self, modname):
     if modname and not modname.startswith('__'):
