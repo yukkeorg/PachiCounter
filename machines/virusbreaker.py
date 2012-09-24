@@ -77,9 +77,9 @@ def output(counts, history):
 
     fmt = ('<span color="#ffff00">'
            '<span size="large"><u>{vat} VAT</u></span>\n'
-           '<span size="small"><u>Start</u></span>\n'
-           '<span size="x-large">{nowgames}</span>\n'
-           '<span size="small"><u>Chain</u></span>\n'
+           '<span size="small">Start</span>\n'
+           '<span size="x-large">{nowgames}</span>/{chancegame}\n'
+           '<span size="small">Chain</span>\n'
            '<span size="large">{chain}</span>\n'
            '<span size="small">Continue Possibility : {continuepossibility}</span>'
            '</span>') 
