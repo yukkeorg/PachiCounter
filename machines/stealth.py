@@ -50,7 +50,7 @@ def output_handler(counts, history):
   }
 
   gamecount_fmt = (
-      '<u>GAMES</u>\n'
+      '<u>START</u>\n'
       '<span size="x-large">{nowcount}</span>/{totalcount}\n'
       '<u>BONUS</u>\n'
       '<span size="large">{bonus}</span>/{firstbonus}({bonusrate})'
