@@ -57,13 +57,11 @@ def output_handler(counts, history):
       '{chain}'
   )
   if counts[COUNT_INDEX_STEALTH_CHANCETIME] == 1:
-    gamecount_fmt = '<span color="#33ffff">' + gamecount_fmt + '</span>'
+    gamecount_fmt = '<span color="#ffff33">' + gamecount_fmt + '</span>'
 
   return ''.join((
-            '<span font-desc="Sui Generis Regular 13">',
-            gamecount_fmt, '\n',
-            '<u>HISTORY</u>\n',
-            '{history}',
+            '<span font-desc="Sui Generis Regular 12">',
+            gamecount_fmt, 
             '</span>'
          )).format(**display_data)
 
