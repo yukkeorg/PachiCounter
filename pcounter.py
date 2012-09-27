@@ -21,7 +21,7 @@ logger.addHandler(logging.StreamHandler())
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASEDIR)
 
-from pcounter import pcounter, hwreceiver
+from pcounter import pcounter, usbioreceiver
 
 INTERVAL = 0.1    # sec
 RC_DIR = os.path.expanduser("~/.pcounter.d")
@@ -76,7 +76,7 @@ def main():
   rc_file = os.path.join(RC_DIR, opt.type)
  
   # ハードウエアレシーバオブジェクト作成
-  hwr = hwreceiver.HwReceiver()
+  hwr = usbioreceiver.UsbIoReceiver()
   hwr.init()
 
   # 機種ごとのカウンタインタフェースをロード
