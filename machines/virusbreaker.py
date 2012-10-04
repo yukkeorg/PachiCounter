@@ -47,7 +47,7 @@ def to_off(cbittype, bitgroup, counts, history):
   
 def output(counts, history):
   data_table = {
-     'nowgames':          util.decolate_number(counts[COUNT_INDEX.COUNT], 4),
+     'nowgames':          util.decolate_number(counts[COUNT_INDEX.COUNT], 3),
      'normalgametotal':   util.decolate_number(counts[COUNT_INDEX_NORMALGAMES], 4),
      'chancegame':        util.decolate_number(counts[COUNT_INDEX_CHANCEGAMES], 4),
      'totalgames':        util.decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 4), 
