@@ -56,7 +56,7 @@ class PCounter(object):
     if counterif and isinstance(counterif, ICounter):
       self.counterif = counterif
     else:
-      raise TypeError("counterif is not ICounter instance.")
+      raise TypeError("counterif は ICounter のインスタンスではありません。")
 
     self.invert = False
 
@@ -132,30 +132,28 @@ class PCounter(object):
         self.display()
       time.sleep(interval)
 
-
-
-def to_on_default(cbittype, iostatus, counts, history):
-  if cbittype == USBIO_BIT.COUNT:
-    counts[COUNT_INDEX.COUNT] += 1
-    counts[COUNT_INDEX.TOTALCOUNT] += 1
-  if cbittype == USBIO_BIT.BONUS:
-    counts[COUNT_INDEX.BONUS] += 1
-    if iostatus & (1 << USBIO_BIT.CHANCE):   # チャンス中なら
-      counts[COUNT_INDEX.CHAIN] += 1
-  if cbittype == USBIO_BIT.CHANCE:
-    counts[COUNT_INDEX.CHANCE] += 1
-  if cbittype == USBIO_BIT.SBONUS:
-    counts[COUNT_INDEX.SBONUS] += 1
-
-
-def to_off_default(cbittype, iostatus, counts, history):
-  if cbittype == USBIO_BIT.BONUS:
-    counts[COUNT_INDEX.COUNT] = 0
-  if cbittype == USBIO_BIT.CHANCE:
-    counts[COUNT_INDEX.CHAIN] = 0
-
-
-def output_default(counts, history):
-  pass
+# def to_on_default(cbittype, iostatus, counts, history):
+#   if cbittype == USBIO_BIT.COUNT:
+#     counts[COUNT_INDEX.COUNT] += 1
+#     counts[COUNT_INDEX.TOTALCOUNT] += 1
+#   if cbittype == USBIO_BIT.BONUS:
+#     counts[COUNT_INDEX.BONUS] += 1
+#     if iostatus & (1 << USBIO_BIT.CHANCE):   # チャンス中なら
+#       counts[COUNT_INDEX.CHAIN] += 1
+#   if cbittype == USBIO_BIT.CHANCE:
+#     counts[COUNT_INDEX.CHANCE] += 1
+#   if cbittype == USBIO_BIT.SBONUS:
+#     counts[COUNT_INDEX.SBONUS] += 1
+# 
+# 
+# def to_off_default(cbittype, iostatus, counts, history):
+#   if cbittype == USBIO_BIT.BONUS:
+#     counts[COUNT_INDEX.COUNT] = 0
+#   if cbittype == USBIO_BIT.CHANCE:
+#     counts[COUNT_INDEX.CHAIN] = 0
+# 
+# 
+# def output_default(counts, history):
+#   pass
 
 

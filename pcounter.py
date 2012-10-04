@@ -21,35 +21,10 @@ logger.addHandler(logging.StreamHandler())
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASEDIR)
 
-from pcounter import pcounter, usbioreceiver
+from pcounter import pcounter, usbioreceiver, pluginloader
 
 INTERVAL = 0.1    # sec
 RC_DIR = os.path.expanduser("~/.pcounter.d")
-
-
-class CounterInterfaceLoader(object):
-  def __init__(self, location=None):
-    self.location = location or "machines"
-    self._mmodules = None
-    self._load_machine_module()
-
-  def _load_machine_module(self):
-    """ machines ディレクトリから、機種別の処理を動的に読み込みます。
-    """
-    modnames = []
-    for fname in os.listdir(os.path.join(BASEDIR, self.location)):
-      if fname.endswith(".py") and not fname.startswith("__init__"):
-        modnames.append(fname[:-3])
-    self._mmodules = __import__(self.location, globals(), locals(), modnames, 0)
-
-  def get(self, modname):
-    if modname and not modname.startswith('__'):
-      mod = self._mmodules.__dict__.get(modname)
-      if mod and callable(mod.init):
-        ic = mod.init()
-        if isinstance(ic, pcounter.ICounter):
-          return ic
-    return None
 
 
 def commandline_parse():
@@ -68,7 +43,8 @@ def make_userconfigdir(d):
       pass
     else:
       raise
-  
+
+
 def main():
   opt, args = commandline_parse()
 
@@ -80,10 +56,10 @@ def main():
   hwr.init()
 
   # 機種ごとのカウンタインタフェースをロード
-  loader = CounterInterfaceLoader()
+  loader = pluginloader.CounterInterfacePluginLoader('machines')
   cif = loader.get(opt.type)
   if cif is None:
-    logger.error("--type option is not specified or missing.")
+    logger.error("--type または -t オプションが指定されていないか、間違っています。")
     return
 
   # PCounterオブジェクト作成
