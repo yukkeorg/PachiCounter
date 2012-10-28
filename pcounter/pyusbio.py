@@ -4,7 +4,7 @@
 # All rights reserved.
 
 # This software is under 2-clause BSD License.
-# for more details, please see LICENSE file. 
+# for more details, please see LICENSE file.
 
 import sys
 import usb.core
@@ -104,7 +104,7 @@ class USBIO(object):
 
 
   def send2read(self, setdata=None):
-    data = self._cmd(CMD_READ_SEND, writedata=setdata) 
+    data = self._cmd(CMD_READ_SEND, writedata=setdata)
     return data[0:2]
 
 

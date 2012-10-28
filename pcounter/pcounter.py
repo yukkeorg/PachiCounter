@@ -11,13 +11,13 @@ from . import util
 
 
 USBIO_BIT = util.enum(
-    'COUNT', 'BONUS', 'CHANCE', 'SBONUS', 
+    'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
     'RESERVED1', 'RESERVED2', 'LAST',
 )
 COUNT_INDEX = util.enum(
-    'COUNT', 'BONUS', 'CHANCE', 'SBONUS', 
+    'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
     'TOTALCOUNT', 'CHAIN', 'USER',
-     LAST=20 
+     LAST=20
 )
 
 N_BITS = USBIO_BIT.LAST
@@ -49,7 +49,7 @@ class ICounter(object):
 
 
 class PCounter(object):
-  def __init__(self, hwreceiver, counterif, rcfile, 
+  def __init__(self, hwreceiver, counterif, rcfile,
                isaddnull=True, output=None, outputcharset=None):
     self.hwreceiver = hwreceiver
     self.rcfile = rcfile
@@ -64,9 +64,9 @@ class PCounter(object):
     self.output = output or sys.stdout
     self.outputcharset = outputcharset or 'utf-8'
 
-    self.counts = [0] * N_COUNTS 
+    self.counts = [0] * N_COUNTS
     self.history = []
-    self._switch = [ False ] * N_BITS 
+    self._switch = [ False ] * N_BITS
 
   def saverc(self):
     try:
@@ -131,29 +131,4 @@ class PCounter(object):
         self.countup(port)
         self.display()
       time.sleep(interval)
-
-# def to_on_default(cbittype, iostatus, counts, history):
-#   if cbittype == USBIO_BIT.COUNT:
-#     counts[COUNT_INDEX.COUNT] += 1
-#     counts[COUNT_INDEX.TOTALCOUNT] += 1
-#   if cbittype == USBIO_BIT.BONUS:
-#     counts[COUNT_INDEX.BONUS] += 1
-#     if iostatus & (1 << USBIO_BIT.CHANCE):   # チャンス中なら
-#       counts[COUNT_INDEX.CHAIN] += 1
-#   if cbittype == USBIO_BIT.CHANCE:
-#     counts[COUNT_INDEX.CHANCE] += 1
-#   if cbittype == USBIO_BIT.SBONUS:
-#     counts[COUNT_INDEX.SBONUS] += 1
-# 
-# 
-# def to_off_default(cbittype, iostatus, counts, history):
-#   if cbittype == USBIO_BIT.BONUS:
-#     counts[COUNT_INDEX.COUNT] = 0
-#   if cbittype == USBIO_BIT.CHANCE:
-#     counts[COUNT_INDEX.CHAIN] = 0
-# 
-# 
-# def output_default(counts, history):
-#   pass
-
 

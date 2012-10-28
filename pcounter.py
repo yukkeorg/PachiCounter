@@ -12,26 +12,25 @@ import sys
 import errno
 import optparse
 import signal
-import time
 import logging
 
-logger = logging.getLogger("PCounter")
-logger.addHandler(logging.StreamHandler())
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASEDIR)
 
 from pcounter import pcounter, usbioreceiver, pluginloader
 
+
 INTERVAL = 0.1    # sec
 RC_DIR = os.path.expanduser("~/.pcounter.d")
 
+logger = logging.getLogger("PCounter")
+logger.addHandler(logging.StreamHandler())
 
-def commandline_parse():
+def parse_commandline():
   parse = optparse.OptionParser()
   parse.add_option("-r", "--reset", dest="reset", action="store_true")
   parse.add_option("-i", "--invert", dest="invert", action="store_true")
-  parse.add_option("-t", "--type", dest="type")
   return parse.parse_args()
 
 
@@ -46,21 +45,28 @@ def make_userconfigdir(d):
 
 
 def main():
-  opt, args = commandline_parse()
+  # コマンドラインオプションをパース
+  opt, args = parse_commandline()
+  if len(args) == 0:
+    logger.error("カウント対象機種を指定されていません。")
+    return 1
 
-  make_userconfigdir(RC_DIR)
-  rc_file = os.path.join(RC_DIR, opt.type)
- 
+  machine = args[0]
+
+  # 機種ごとのカウンタインタフェースをロード
+  loader= pluginloader.CounterInterfacePluginLoader(BASEDIR, 'machines')
+  cif = loader.get(machine)
+  if cif is None:
+    logger.error("カウント対象機種の指定が間違っています。")
+    return 1
+
   # ハードウエアレシーバオブジェクト作成
   hwr = usbioreceiver.UsbIoReceiver()
   hwr.init()
 
-  # 機種ごとのカウンタインタフェースをロード
-  loader = pluginloader.CounterInterfacePluginLoader('machines')
-  cif = loader.get(opt.type)
-  if cif is None:
-    logger.error("--type または -t オプションが指定されていないか、間違っています。")
-    return
+  # 設定ファイル保存ディレクトリとファイルのパスを生成
+  make_userconfigdir(RC_DIR)# Ctrl+C 受信
+  rc_file = os.path.join(RC_DIR, machine)
 
   # PCounterオブジェクト作成
   pc = pcounter.PCounter(hwr, cif, rc_file)
@@ -69,8 +75,7 @@ def main():
 
   # シグナルハンドラ設定
   def signal_handler(signum, stackframe):
-    # Ctrl+C 受信
-    if signum == signal.SIGTERM:
+    if signum == signal.SIGTERM: # Ctrl+C 受信
       pc.saverc()
       sys.exit(1)
   signal.signal(signal.SIGTERM, signal_handler)
@@ -82,5 +87,8 @@ def main():
   finally:
     pc.saverc()
 
+  return 0
+
+
 if __name__ == '__main__':
-  main()
+  sys.exit(main())

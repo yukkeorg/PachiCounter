@@ -18,12 +18,12 @@ def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):
   if num_color is None:
     num_fmt = str(num)
   else:
-    num_fmt = '<span color="{0}">{1}</span>'.format(num_color, 
+    num_fmt = '<span color="{0}">{1}</span>'.format(num_color,
                                                     raw_num_str[last_zero_pos:])
   if last_zero_pos == 0:
     zero_fmt = ''
   else:
-    zero_fmt = '<span color="{0}">{1}</span>'.format(zero_color, 
+    zero_fmt = '<span color="{0}">{1}</span>'.format(zero_color,
                                                   raw_num_str[0:last_zero_pos])
 
   return ''.join((zero_fmt, num_fmt))
