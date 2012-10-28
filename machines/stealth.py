@@ -5,7 +5,7 @@ from pcounter import pcounter, util
 COUNT_INDEX_STEALTH_CHANCETIME = pcounter.COUNT_INDEX.USER
 
 def init():
-  return pcounter.ICounter("stealth", switchon_handler, 
+  return pcounter.ICounter("stealth", switchon_handler,
                                       switchoff_handler,
                                       output_handler)
 
@@ -42,8 +42,8 @@ def output_handler(counts, history):
     'nowcount'   : util.decolate_number(counts[pcounter.COUNT_INDEX.COUNT], 3),
     'totalcount' : util.decolate_number(counts[pcounter.COUNT_INDEX.TOTALCOUNT], 4),
     'bonus'      : util.decolate_number(counts[pcounter.COUNT_INDEX.BONUS], 2),
-    'firstbonus' : util.decolate_number(counts[pcounter.COUNT_INDEX.CHANCE], 2),  
-    'bonusrate'  : util.gen_bonusrate(counts[pcounter.COUNT_INDEX.TOTALCOUNT], 
+    'firstbonus' : util.decolate_number(counts[pcounter.COUNT_INDEX.CHANCE], 2),
+    'bonusrate'  : util.gen_bonusrate(counts[pcounter.COUNT_INDEX.TOTALCOUNT],
                                   counts[pcounter.COUNT_INDEX.CHANCE]),
     'chain'      : util.gen_chain(counts[pcounter.COUNT_INDEX.CHAIN], "Chain"),
     'history'    : util.gen_history(history, 3, sep='  ', isfill=True),
@@ -59,9 +59,5 @@ def output_handler(counts, history):
   if counts[COUNT_INDEX_STEALTH_CHANCETIME] == 1:
     gamecount_fmt = '<span color="#ffff33">' + gamecount_fmt + '</span>'
 
-  return ''.join((
-            '<span font-desc="Sui Generis Regular 12">',
-            gamecount_fmt, 
-            '</span>'
-         )).format(**display_data)
+  return gamecount_fmt.format(**display_data)
 
