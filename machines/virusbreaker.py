@@ -15,7 +15,7 @@ falldown_possibility = 1/338.5
 def init():
   return pcounter.ICounter("virusbreaker", to_on, to_off, output)
 
-  
+
 def to_on(cbittype, bitgroup, counts, history):
   if cbittype == USBIO_BIT.COUNT:
     counts[COUNT_INDEX.COUNT] += 1
@@ -44,16 +44,16 @@ def to_off(cbittype, bitgroup, counts, history):
     counts[COUNT_INDEX.COUNT] = 0
     counts[COUNT_INDEX.CHAIN] = 0
     counts[COUNT_INDEX_CHANCEGAMES] = 0
-  
+
 def output(counts, history):
   data_table = {
      'nowgames':          util.decolate_number(counts[COUNT_INDEX.COUNT], 3),
      'normalgametotal':   util.decolate_number(counts[COUNT_INDEX_NORMALGAMES], 4),
      'chancegame':        util.decolate_number(counts[COUNT_INDEX_CHANCEGAMES], 4),
-     'totalgames':        util.decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 4), 
+     'totalgames':        util.decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 4),
      'bonus':             util.decolate_number(counts[COUNT_INDEX.BONUS], 3),
-     'firstbonus':        util.decolate_number(counts[COUNT_INDEX.CHANCE], 2), 
-     'firstbonus_rate':   util.gen_bonusrate(counts[COUNT_INDEX_NORMALGAMES], 
+     'firstbonus':        util.decolate_number(counts[COUNT_INDEX.CHANCE], 2),
+     'firstbonus_rate':   util.gen_bonusrate(counts[COUNT_INDEX_NORMALGAMES],
                                          counts[COUNT_INDEX.CHANCE]),
      'chain':            util.decolate_number(counts[COUNT_INDEX.CHAIN], 3),
      'history':           util.gen_history(history, 3, sep="\n", isfill=True),
@@ -68,10 +68,10 @@ def output(counts, history):
     else:
       t = '{0}th'.format(counts[COUNT_INDEX.CHANCE])
 
-    continue_possibilty = ((1.0 - falldown_possibility) 
+    continue_possibilty = ((1.0 - falldown_possibility)
                                ** counts[COUNT_INDEX_CHANCEGAMES]) * 100
     data_table.update({
-       'continuepossibility' : '{0:.2f}%'.format(continue_possibilty), 
+       'continuepossibility' : '{0:.2f}%'.format(continue_possibilty),
        'vat'                 : t,
     })
 
@@ -82,13 +82,13 @@ def output(counts, history):
            '<span size="small">Chain</span>\n'
            '<span size="large">{chain}</span>\n'
            '<span size="small">Continue Possibility : {continuepossibility}</span>'
-           '</span>') 
+           '</span>')
 
   else:
-    fmt = ('<span size="small"><u>Start</u></span>\n' 
+    fmt = ('<span size="small"><u>Start</u></span>\n'
            '<span size="x-large">{nowgames}</span>/{normalgametotal}\n'
            '<span size="small"><u>Bonus</u></span>\n'
            '<span size="large">{bonus}</span>/{firstbonus} {firstbonus_rate}')
 
   return fmt.format(**data_table)
-  
+
