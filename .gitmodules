@@ -1,0 +1,6 @@
+[submodule "pyusbio"]
+	path = pyusbio
+	url = https://github.com/yukkeorg/pyusbio.git
+[submodule "pcounter/pyusbio"]
+	path = pcounter/pyusbio
+	url = https://github.com/yukkeorg/pyusbio.git

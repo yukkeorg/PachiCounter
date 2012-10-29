@@ -1,14 +1,13 @@
 # coding: utf-8
 
+import sys
 import logging
-from . import hwreceiver 
-from . import pyusbio
+from hwreceiver import HwReceiver
+from pyusbio.pyusbio import USBIO
 
-logger = logging.getLogger('PCounter')
-
-class UsbIoReceiver(hwreceiver.HwReceiver):
+class UsbIoReceiver(HwReceiver):
   def init(self):
-    self.usbio = pyusbio.USBIO()
+    self.usbio = USBIO()
     if not self.usbio.find_and_init():
       raise hwreceiver.HwReceiverError("Failed to initialize USB-IO 2.0 module.")
 
