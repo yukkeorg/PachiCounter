@@ -18,14 +18,16 @@ import logging
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASEDIR)
 
+logger = logging.getLogger("PCounter")
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
+
 from pcounter import pcounter, usbioreceiver, pluginloader
 
 
 INTERVAL = 0.1    # sec
 RC_DIR = os.path.expanduser("~/.pcounter.d")
 
-logger = logging.getLogger("PCounter")
-logger.addHandler(logging.StreamHandler())
 
 def parse_commandline():
   parse = optparse.OptionParser()
