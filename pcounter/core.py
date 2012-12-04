@@ -5,16 +5,14 @@ import time
 import pickle
 import logging
 
-logger = logging.getLogger("PCounter")
+from counterplugin import ICounter
+from util import enum
 
-from . import util
-
-
-USBIO_BIT = util.enum(
+USBIO_BIT = enum(
     'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
     'RESERVED1', 'RESERVED2', 'LAST',
 )
-COUNT_INDEX = util.enum(
+COUNT_INDEX = enum(
     'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
     'TOTALCOUNT', 'CHAIN', 'USER',
      LAST=20
@@ -25,27 +23,9 @@ N_COUNTS = COUNT_INDEX.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
 BITSHIFT = USBIO_BIT.LAST
 
+logger = logging.getLogger("PCounter")
+
 class PCounterError(Exception): pass
-
-
-class ICounter(object):
-  """ コールバックインターフェース """
-  def __init__(self, name=None, func_to_on=None, func_to_off=None, func_output=None):
-    self.name = name
-    if callable(func_to_on):
-      self.func_to_on = func_to_on
-    else:
-      raise TypeError("func_to_on is not function.")
-
-    if callable(func_to_off):
-      self.func_to_off = func_to_off
-    else:
-      raise TypeError("func_to_off is not function.")
-
-    if callable(func_output):
-      self.func_output = func_output
-    else:
-      raise TypeError("func_output is not function.")
 
 
 class PCounter(object):
@@ -95,7 +75,6 @@ class PCounter(object):
     if invert is not None:
       self.invert = invert
 
-
   def countup(self, port):
     for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
       checkbit = 1 << bit
@@ -127,7 +106,8 @@ class PCounter(object):
       port = self.hwreceiver.get_port_value()
       if port != prev_port:
         prev_port = port
-        if self.invert: port = ~port
+        if self.invert: 
+          port = ~port
         self.countup(port)
         self.display()
       time.sleep(interval)

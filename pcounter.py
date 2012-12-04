@@ -22,7 +22,9 @@ logger = logging.getLogger("PCounter")
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
 
-from pcounter import pcounter, usbioreceiver, pluginloader
+from pcounter.core import PCounter
+from pcounter.usbioreceiver import UsbIoReceiver
+from pcounter.counterplugin import CounterPluginLoader
 
 
 INTERVAL = 0.1    # sec
@@ -56,22 +58,22 @@ def main():
   machine = args[0]
 
   # 機種ごとのカウンタインタフェースをロード
-  loader= pluginloader.CounterInterfacePluginLoader(BASEDIR, 'machines')
+  loader = CounterPluginLoader(BASEDIR, 'machines')
   cif = loader.get(machine)
   if cif is None:
     logger.error("カウント対象機種の指定が間違っています。")
     return 1
 
   # ハードウエアレシーバオブジェクト作成
-  hwr = usbioreceiver.UsbIoReceiver()
+  hwr = UsbIoReceiver()
   hwr.init()
 
   # 設定ファイル保存ディレクトリとファイルのパスを生成
-  make_userconfigdir(RC_DIR)# Ctrl+C 受信
+  make_userconfigdir(RC_DIR)
   rc_file = os.path.join(RC_DIR, machine)
 
   # PCounterオブジェクト作成
-  pc = pcounter.PCounter(hwr, cif, rc_file)
+  pc = PCounter(hwr, cif, rc_file)
   pc.loadrc(opt.reset)
   pc.setinvert(opt.invert)
 

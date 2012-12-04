@@ -4,8 +4,11 @@
 # Version : 0.10 (2012/08/04)
 # Auther  : Yukke.org <pcounter@yukke.org>
 
-from pcounter import pcounter, util
-from pcounter.pcounter import COUNT_INDEX, USBIO_BIT
+from pcounter.core import COUNT_INDEX, USBIO_BIT
+from pcounter.counterplugin import ICounter
+from pcounter.util import (decolate_number, gen_bonusrate, 
+                           gen_bonusrate, gen_history,
+                           gen_chain, bit_is_enable)
 
 COUNT_INDEX_CHANCEGAMES = COUNT_INDEX.USER
 COUNT_INDEX_NORMALGAMES = COUNT_INDEX.USER + 1
@@ -13,7 +16,7 @@ COUNT_INDEX_NORMALGAMES = COUNT_INDEX.USER + 1
 falldown_possibility = 1/338.5
 
 def init():
-  return pcounter.ICounter("virusbreaker", to_on, to_off, output)
+  return ICounter("virusbreaker", to_on, to_off, output)
 
 
 def to_on(cbittype, bitgroup, counts, history):
@@ -47,16 +50,16 @@ def to_off(cbittype, bitgroup, counts, history):
 
 def output(counts, history):
   data_table = {
-     'nowgames':          util.decolate_number(counts[COUNT_INDEX.COUNT], 3),
-     'normalgametotal':   util.decolate_number(counts[COUNT_INDEX_NORMALGAMES], 4),
-     'chancegame':        util.decolate_number(counts[COUNT_INDEX_CHANCEGAMES], 4),
-     'totalgames':        util.decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 4),
-     'bonus':             util.decolate_number(counts[COUNT_INDEX.BONUS], 3),
-     'firstbonus':        util.decolate_number(counts[COUNT_INDEX.CHANCE], 2),
-     'firstbonus_rate':   util.gen_bonusrate(counts[COUNT_INDEX_NORMALGAMES],
+     'nowgames':          decolate_number(counts[COUNT_INDEX.COUNT], 3),
+     'normalgametotal':   decolate_number(counts[COUNT_INDEX_NORMALGAMES], 4),
+     'chancegame':        decolate_number(counts[COUNT_INDEX_CHANCEGAMES], 4),
+     'totalgames':        decolate_number(counts[COUNT_INDEX.TOTALCOUNT], 4),
+     'bonus':             decolate_number(counts[COUNT_INDEX.BONUS], 3),
+     'firstbonus':        decolate_number(counts[COUNT_INDEX.CHANCE], 2),
+     'firstbonus_rate':   gen_bonusrate(counts[COUNT_INDEX_NORMALGAMES],
                                          counts[COUNT_INDEX.CHANCE]),
-     'chain':            util.decolate_number(counts[COUNT_INDEX.CHAIN], 3),
-     'history':           util.gen_history(history, 3, sep="\n", isfill=True),
+     'chain':             decolate_number(counts[COUNT_INDEX.CHAIN], 3),
+     'history':           gen_history(history, 3, sep="\n", isfill=True),
   }
 
 
