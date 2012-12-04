@@ -6,7 +6,7 @@ import pickle
 import logging
 
 from counterplugin import ICounter
-from util import enum
+from enum import enum
 
 USBIO_BIT = enum(
     'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
