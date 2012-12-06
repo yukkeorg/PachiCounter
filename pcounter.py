@@ -9,90 +9,12 @@
 
 import os
 import sys
-import errno
-import optparse
-import signal
-import logging
-
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, BASEDIR)
 
-logger = logging.getLogger("PCounter")
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.StreamHandler())
-
-from pcounter.core import PCounter
-from pcounter.usbioreceiver import UsbIoReceiver
-from pcounter.counterplugin import CounterPluginLoader
-
-
-INTERVAL = 0.1    # sec
-RC_DIR = os.path.expanduser("~/.pcounter.d")
-
-
-def parse_commandline():
-  parse = optparse.OptionParser()
-  parse.add_option("-r", "--reset", dest="reset", action="store_true")
-  parse.add_option("-i", "--invert", dest="invert", action="store_true")
-  return parse.parse_args()
-
-
-def make_userconfigdir(d):
-  try:
-    os.makedirs(d)
-  except OSError as e:
-    if e.errno == errno.EEXIST:
-      pass
-    else:
-      raise
-
-
-def main():
-  # コマンドラインオプションをパース
-  opt, args = parse_commandline()
-  if len(args) == 0:
-    logger.error("カウント対象機種を指定されていません。")
-    return 1
-
-  machine = args[0]
-
-  # 機種ごとのカウンタインタフェースをロード
-  loader = CounterPluginLoader(BASEDIR, 'machines')
-  cif = loader.get(machine)
-  if cif is None:
-    logger.error("カウント対象機種の指定が間違っています。")
-    return 1
-
-  # ハードウエアレシーバオブジェクト作成
-  hwr = UsbIoReceiver()
-  hwr.init()
-
-  # 設定ファイル保存ディレクトリとファイルのパスを生成
-  make_userconfigdir(RC_DIR)
-  rc_file = os.path.join(RC_DIR, machine)
-
-  # PCounterオブジェクト作成
-  pc = PCounter(hwr, cif, rc_file)
-  pc.loadrc(opt.reset)
-  pc.setinvert(opt.invert)
-
-  # シグナルハンドラ設定
-  def signal_handler(signum, stackframe):
-    if signum == signal.SIGTERM: # Ctrl+C 受信
-      pc.saverc()
-      sys.exit(1)
-  signal.signal(signal.SIGTERM, signal_handler)
-
-  try:
-    pc.loop(INTERVAL)
-  except KeyboardInterrupt:
-    pass
-  finally:
-    pc.saverc()
-
-  return 0
-
+from pcounter.app import App
 
 if __name__ == '__main__':
-  sys.exit(main())
+  app = App(BASEDIR, sys.argv[1:])
+  sys.exit(app.main())
