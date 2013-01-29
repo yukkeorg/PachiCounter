@@ -18,11 +18,12 @@ def output_handler(counts, history):
     'chain'      : decolate_number(counts[COUNT_INDEX.CHAIN], 2),
   }
 
-  counter_fmt = (
-      '{nowcount} / {totalcount} | {bonus} / {firstbonus} | {bonusrate}'
-  )
   if counts[COUNT_INDEX_STEALTH_CHANCETIME] == 1:
-    counter_fmt = '<span color="#ffff33">' + counter_fmt + ' | {chain}</span>'
+    counter_fmt = ( '<span color="#ffff33">'
+                    '{nowcount} / {totalcount} | {bonus} / {firstbonus} | {chain}'
+                    '</span>' )
+  else:
+    counter_fmt = '{nowcount} / {totalcount} | {bonus} / {firstbonus} | {bonusrate}'
 
   return counter_fmt.format(**display_data)
 
