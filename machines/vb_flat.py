@@ -19,6 +19,8 @@ def output(counts, history):
      'firstbonus_rate':   gen_bonusrate(counts[COUNT_INDEX_NORMALGAMES],
                                          counts[COUNT_INDEX.CHANCE]),
      'chain':             decolate_number(counts[COUNT_INDEX.CHAIN], 3),
+     'chain_rate':        gen_bonusrate(counts[COUNT_INDEX_CHANCEGAMES],
+                                         counts[COUNT_INDEX.CHAIN]),
   }
 
 
@@ -33,14 +35,14 @@ def output(counts, history):
     continue_possibilty = ((1.0 - falldown_possibility)
                                ** counts[COUNT_INDEX_CHANCEGAMES]) * 100
     data_table.update({
-       'continuepossibility' : '{0:.2f}%'.format(continue_possibilty),
+       'continuepossibility' : '{0:3.1f}%'.format(continue_possibilty),
        'vat'                 : t,
     })
 
-    fmt = '<span color="#ffff00">{vat}VAT | {nowgames} / {chancegame} | {continuepossibility} | {chain}</span>'
+    fmt = '<span color="#ffff00">{vat}VAT | {nowgames} / {chancegame} <small>({continuepossibility})</small> | {chain} <small>({chain_rate})</small></span>'
 
   else:
-   fmt = '{nowgames} / {normalgametotal} | {bonus} / {firstbonus} | {firstbonus_rate}'
+   fmt = '{nowgames} / {normalgametotal} | {bonus} / {firstbonus} <small>({firstbonus_rate})</small>'
 
   return fmt.format(**data_table)
 
