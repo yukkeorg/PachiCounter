@@ -54,15 +54,15 @@ def output(counts, history):
 
 
   if counts[COUNT_INDEX.CHAIN] == 0:
-    fmt = ('{count}/{normalcount} | {bonuscount}/{uzcount}/{xrcount} | {uz_rate}')
+    fmt = ('{count} / {normalcount} | {bonuscount} / {uzcount} / {xrcount} | {uz_rate}')
 
   elif counts[COUNT_INDEX.CHAIN] == 1:
     fmt = ('<span color="green">'
-           'UFO-ZONE | {count}/{normalcount} | {bonuscount}/{uzcount}/{xrcount} | {uz_rate}</span>')
+           'UFO-ZONE | {count} / {normalcount} | {bonuscount} / {uzcount} / {xrcount} | {uz_rate}</span>')
 
   else:
     fmt = ('<span color="yellow">'
-           'XTRA-RUSH | {count}/{uzxrcount} | {xr_chain}/{bonuscount} | {bonus_rate}</span>')
+           'XTRA-RUSH | {count} / {uzxrcount} | {xr_chain} / {bonuscount} | {bonus_rate}</span>')
 
   return fmt.format(**data_table)
 
