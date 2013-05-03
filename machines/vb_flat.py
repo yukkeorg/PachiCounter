@@ -32,14 +32,14 @@ def output(counts, history):
     else:
       t = '{0}th'.format(counts[COUNT_INDEX.CHANCE])
 
-    continue_possibilty = ((1.0 - falldown_possibility)
-                               ** counts[COUNT_INDEX_CHANCEGAMES]) * 100
+    # continue_possibilty = ((1.0 - falldown_possibility)
+    #                            ** counts[COUNT_INDEX_CHANCEGAMES]) * 100
     data_table.update({
-       'continuepossibility' : '{0:3.1f}%'.format(continue_possibilty),
+        #   'continuepossibility' : '{0:3.1f}%'.format(continue_possibilty),
        'vat'                 : t,
     })
 
-    fmt = '<span color="#ffff00">{vat}VAT | {nowgames} / {chancegame} <small>({continuepossibility})</small> | {chain} <small>({chain_rate})</small></span>'
+    fmt = '<span color="#ffff00">{vat}VAT | {nowgames} / {chancegame} | {chain} <small>({chain_rate})</small></span>'
 
   else:
    fmt = '{nowgames} / {normalgametotal} | {bonus} / {firstbonus} <small>({firstbonus_rate})</small>'
