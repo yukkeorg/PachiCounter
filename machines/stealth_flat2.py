@@ -31,7 +31,7 @@ def output_handler(counts, history):
   if counts[COUNT_INDEX_STEALTH_CHANCETIME] == 1:
     counter_fmt = '<span color="#ffff33">{chain}</span>'
   else:
-    counter_fmt = '{nowcount} / {totalcount}'
+    counter_fmt = '{nowcount} <small>/ <span color="#cccccc">{totalcount}</span></small>'
 
   return counter_fmt.format(**display_data)
 
