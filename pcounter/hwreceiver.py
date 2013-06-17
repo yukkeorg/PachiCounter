@@ -3,7 +3,7 @@
 class HwReceiverError(Exception): pass
 
 class HwReceiver(object):
-  def init(self):
+  def get_value(self):
     raise NotImplementedError
 
   def get_port_value(self):

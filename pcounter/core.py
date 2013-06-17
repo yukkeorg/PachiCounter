@@ -39,14 +39,13 @@ class PCounter(object):
       raise TypeError("counterif は ICounter のインスタンスではありません。")
 
     self.invert = False
-
     self.isaddnull = isaddnull
     self.output = output or sys.stdout
     self.outputcharset = outputcharset or 'utf-8'
-
     self.counts = [0] * N_COUNTS
     self.history = []
     self._switch = [ False ] * N_BITS
+    self.__prevcountstr = ""
 
   def saverc(self):
     try:
@@ -91,10 +90,14 @@ class PCounter(object):
 
   def display(self):
     countstr = self.counterif.func_output(self.counts, self.history)
-    self.output.write(countstr)
-    if self.isaddnull:
-      self.output.write("\x00")
-    self.output.flush()
+    if countstr != self.__prevcountstr:
+        self.output.write(countstr)
+        if self.isaddnull:
+          self.output.write("\x00")
+        else:
+          self.output.write("\n")
+        self.output.flush()
+        self.__prevcountstr = countstr
 
   def reset_counter(self):
     for i in len(self.counts):
@@ -103,11 +106,9 @@ class PCounter(object):
   def loop(self, interval):
     prev_port = -1
     while 1:
-      port = self.hwreceiver.get_port_value()
+      port = self.hwreceiver.get_port_value(self.invert)
       if port != prev_port:
         prev_port = port
-        if self.invert: 
-          port = ~port
         self.countup(port)
         self.display()
       time.sleep(interval)

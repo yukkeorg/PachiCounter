@@ -4,7 +4,7 @@ from pluginloader import PluginLoader
 
 class ICounter(object):
   """ コールバックインターフェース """
-  def __init__(self, name=None, func_to_on=None, func_to_off=None, func_output=None):
+  def __init__(self, name, func_to_on, func_to_off, func_output):
     self.name = name
     if callable(func_to_on):
       self.func_to_on = func_to_on
@@ -23,14 +23,21 @@ class ICounter(object):
 
 
 class CounterPluginLoader(PluginLoader):
+  """ PachiCounter用プラグインローダー """
   def __init__(self, basedir, plugindir):
     super(CounterPluginLoader, self).__init__(basedir, plugindir)
 
   def get(self, pluginname):
     mod = super(CounterPluginLoader, self).get(pluginname)
-    if mod and callable(mod.init):
-      ic = mod.init()
-      if isinstance(ic, ICounter):
-        return ic
-    return None
+    if mod:
+      if callable(mod.init):
+        ic = mod.init()
+        if isinstance(ic, ICounter):
+          return ic
+        else:
+          raise TypeError("Returned variable from 'init' function is not 'ICounter' object.")
+      else:
+        raise AttributeError("{0} is not contain 'init' function".format(pluginname))
+    else:
+      raise NameError("{0} is not found.".format(pluginname))
 

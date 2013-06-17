@@ -19,7 +19,7 @@ logger.addHandler(logging.StreamHandler())
 class App(object):
 
   def __init__(self, basedir, commandline,
-               pollingInterval=0.1, resourcedir=None):
+               pollingInterval=0.05, resourcedir=None):
     if resourcedir is None:
       resourcedir = u"~/.pcounter.d"
     self.commandline = commandline
@@ -59,7 +59,6 @@ class App(object):
 
     # ハードウエアレシーバオブジェクト作成
     hwr = UsbIoReceiver()
-    hwr.init()
 
     # 設定ファイル保存ディレクトリとファイルのパスを生成
     self.make_resourcedir()
