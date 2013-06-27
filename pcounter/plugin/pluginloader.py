@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import os
-import sys
 
 class PluginLoader(object):
   def __init__(self, basedir, plugindir):

@@ -1,113 +1,111 @@
 # coding: utf-8
+# vim: ts=2 sts=2 sw=2 et
 
 import sys
 import time
-import pickle
 import logging
+from collections import Counter
+try:
+  import ujson as json
+except ImportError:
+  try:
+    import simplejson as json
+  except ImportError:
+    import json
 
-from counterplugin import ICounter
-from enum import enum
+from hwr import HwReceiver
+from plugin import ICounter
+from pctypes import enum
 
-USBIO_BIT = enum(
-    'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
-    'RESERVED1', 'RESERVED2', 'LAST',
-)
-COUNT_INDEX = enum(
-    'COUNT', 'BONUS', 'CHANCE', 'SBONUS',
-    'TOTALCOUNT', 'CHAIN', 'USER',
-     LAST=20
-)
+USBIO_BIT = enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 'LAST')
 
 N_BITS = USBIO_BIT.LAST
-N_COUNTS = COUNT_INDEX.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
 BITSHIFT = USBIO_BIT.LAST
 
 logger = logging.getLogger("PCounter")
 
+
 class PCounterError(Exception): pass
+
+class CountData(object):
+  def __init__(self, colnames):
+    self.counts = dict((k, 0) for k in colnames)
+    self.history = []
+
+  def __getitem__(self, key):
+    return self.counts[key]
+
+  def __setitem__(self, key, val):
+    self.counts[key] = val
+
+  def resetCounter(self):
+    for k in self.counts:
+      self.counts[k] = 0
+
+  def resetHistory(self):
+    del self.history[:]
+
+  def save(self, filename):
+    with open(filename, 'wb') as fp:
+      json.dump(self.__dict__, fp)
+
+  def load(self, filename):
+    with open(filename, 'rb') as fp:
+      try:
+        data = json.load(fp)
+      except:
+        return
+    if 'counts' in data:
+      self.counts.update(data['counts'])
+    if 'history' in data:
+      self.resetHistory()
+      self.history.extend(data['history'])
 
 
 class PCounter(object):
-  def __init__(self, hwreceiver, counterif, rcfile,
-               isaddnull=True, output=None, encoding=None):
-    self.hwreceiver = hwreceiver
-    self.rcfile = rcfile
-    if counterif and isinstance(counterif, ICounter):
-      self.counterif = counterif
-    else:
-      raise TypeError("counterif は ICounter のインスタンスではありません。")
-    self.invert = False
-    self.isaddnull = isaddnull
+  def __init__(self, hr, counterif, countdata, eol=None, output=None):
+    if not isinstance(hr, HwReceiver):
+      raise TypeError(u"hwreceiver は HwReceiver のインスタンスではありません。")
+    if not isinstance(counterif, ICounter):
+      raise TypeError(u"counterif は ICounter のインスタンスではありません。")
+
+    self.hr = hr
+    self.counterif = counterif
+    self.eol = '\0' if eol is None else eol
     self.output = output or sys.stdout
-    self.encoding = encoding or 'utf-8'
-    self.counts = [0] * N_COUNTS
-    self.history = []
-    self._switch = [ False ] * N_BITS
+    self.countdata = countdata
+    self.__switch = 0
     self.__prevcountstr = ""
-    self.__prev_port = -1
+    self.__prevportval = -1
 
-  def saverc(self):
-    try:
-      with open(self.rcfile, "wb") as f:
-        pickle.dump(self.counts, f, 2)
-        pickle.dump(self.history, f, 2)
-        f.close()
-    except IOError as e:
-      logger.error("カウンタ値が保存できませんでした。原因：{0}".format(e.message))
-
-  def loadrc(self, isreset):
-    if isreset:
-      return
-    try:
-      with open(self.rcfile, "rb") as f:
-        self.counts = pickle.load(f)
-        self.history = pickle.load(f)
-        f.close()
-      return True
-    except IOError as e:
-      logger.error("カウンタ値を読み込めませんでした。原因：{0}".format(e.message))
-      return False
-
-  # Setter
-  def setinvert(self, invert):
-    if invert is not None:
-      self.invert = invert
-
-  def countup(self, port):
-    for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
+  def countup(self, portval):
+    for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, 
+                USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
       checkbit = 1 << bit
-      if port & checkbit:
+      edgeup = bool(portval & checkbit)
+      state = bool(self.__switch & checkbit)
+      if edgeup == True and state == False:
         # 調査中ビットの状態が0->1になるとき
-        if not self._switch[bit]:
-          self._switch[bit] = True
-          self.counterif.func_to_on(bit, port, self.counts, self.history)
-      else:
+        self.__switch |= checkbit
+        self.counterif.func_to_on(bit, portval, self.countdata)
+      elif edgeup == False and state == True:
         # 調査中ビットの状態が1->0になるとき
-        if self._switch[bit]:
-          self._switch[bit] = False
-          self.counterif.func_to_off(bit, port, self.counts, self.history)
+        self.__switch &= (~checkbit)
+        self.counterif.func_to_off(bit, portval, self.countdata)
 
   def display(self):
-    countstr = self.counterif.func_output(self.counts, self.history)
+    countstr = self.counterif.func_output(self.countdata)
     if countstr != self.__prevcountstr:
-        self.output.write(countstr)
-        if self.isaddnull:
-          self.output.write("\x00")
-        else:
-          self.output.write("\n")
-        self.output.flush()
         self.__prevcountstr = countstr
-
-  def reset_counter(self):
-    for i in len(self.counts):
-      self.counts[i] = 0
+        self.output.write(countstr)
+        self.output.write(self.eol)
+        self.output.flush()
 
   def loop(self):
-    port = self.hwreceiver.get_port_value(self.invert)
-    if port != self.__prev_port:
-      self.__prev_port = port
-      self.countup(port)
+    portval = self.hr.get_port_value()
+    if portval != self.__prevportval:
+      self.__prevportval = portval
+      self.countup(portval)
       self.display()
-    return True
 
