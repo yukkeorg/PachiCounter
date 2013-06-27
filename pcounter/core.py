@@ -30,22 +30,22 @@ class PCounterError(Exception): pass
 
 class PCounter(object):
   def __init__(self, hwreceiver, counterif, rcfile,
-               isaddnull=True, output=None, outputcharset=None):
+               isaddnull=True, output=None, encoding=None):
     self.hwreceiver = hwreceiver
     self.rcfile = rcfile
     if counterif and isinstance(counterif, ICounter):
       self.counterif = counterif
     else:
       raise TypeError("counterif は ICounter のインスタンスではありません。")
-
     self.invert = False
     self.isaddnull = isaddnull
     self.output = output or sys.stdout
-    self.outputcharset = outputcharset or 'utf-8'
+    self.encoding = encoding or 'utf-8'
     self.counts = [0] * N_COUNTS
     self.history = []
     self._switch = [ False ] * N_BITS
     self.__prevcountstr = ""
+    self.__prev_port = -1
 
   def saverc(self):
     try:
@@ -103,13 +103,11 @@ class PCounter(object):
     for i in len(self.counts):
       self.counts[i] = 0
 
-  def loop(self, interval):
-    prev_port = -1
-    while 1:
-      port = self.hwreceiver.get_port_value(self.invert)
-      if port != prev_port:
-        prev_port = port
-        self.countup(port)
-        self.display()
-      time.sleep(interval)
+  def loop(self):
+    port = self.hwreceiver.get_port_value(self.invert)
+    if port != self.__prev_port:
+      self.__prev_port = port
+      self.countup(port)
+      self.display()
+    return True
 
