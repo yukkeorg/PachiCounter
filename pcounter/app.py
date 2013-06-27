@@ -1,4 +1,5 @@
 # coding: utf-8
+# vim: st=2 sts=2 sw=2 et
 
 import os
 import sys
@@ -10,6 +11,8 @@ import logging
 from core import PCounter
 from usbioreceiver import UsbIoReceiver
 from counterplugin import CounterPluginLoader
+
+from gi.repository import GLib
 
 logger = logging.getLogger("PCounter")
 logger.setLevel(logging.DEBUG)
@@ -68,19 +71,11 @@ class App(object):
     pc = PCounter(hwr, cif, rc_file)
     pc.loadrc(opt.reset)
     pc.setinvert(opt.invert)
-
-    # シグナルハンドラ設定
-    def signal_handler(signum, stackframe):
-      if signum == signal.SIGTERM: # Ctrl+C 受信
-        pc.saverc()
-        sys.exit(1)
-    signal.signal(signal.SIGTERM, signal_handler)
-
+    GLib.timeout_add(50, pc.loop)
     try:
-      pc.loop(self.pollingInterval)
+      GLib.MainLoop().run()
     except KeyboardInterrupt:
       pass
     finally:
       pc.saverc()
 
-    return 0
