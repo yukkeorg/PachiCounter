@@ -12,7 +12,7 @@ from gi.repository import GLib
 
 from core import PCounter, CountData
 from hwr import hwreceiverFactory
-from plugin import CounterPluginLoader
+from plugin import PluginLoader
 
 logger = logging.getLogger("PCounter")
 logger.setLevel(logging.DEBUG)
@@ -39,7 +39,6 @@ class App(object):
   def parse_commandline(self, args):
     parse = optparse.OptionParser()
     parse.add_option("-r", "--reset", dest="reset", action="store_true")
-    parse.add_option("-i", "--invert", dest="invert", action="store_true")
     return parse.parse_args(args)
 
   def main(self, args):
@@ -49,27 +48,25 @@ class App(object):
       logger.error("カウント対象機種を指定されていません。")
       return 1
     machine = args[0]
-    # ハードウエアレシーバオブジェクト作成
-    hw = hwreceiverFactory("usbio")
     # 設定ファイル保存ディレクトリとファイルのパスを生成
     make_resourcedir(self.resourcedir)
-    datafile = os.path.join(self.resourcedir, machine)
+    datafilepath = os.path.join(self.resourcedir, machine)
+    # ハードウエアレシーバオブジェクト作成
+    hw = hwreceiverFactory("usbio")
     # 機種ごとのカウンタインタフェースをロード
-    loader = CounterPluginLoader(self.basedir, 'machines')
-    mod = loader.get(machine)
-    cif, cd = mod.init()
-    if opt.reset == True:
-      pass
-    else:
-      cd.load(datafile)
+    loader = PluginLoader(self.basedir, 'machines')
+    plugin = loader.get(machine)()
+    cd = plugin.createCountData()
+    if opt.reset != True:
+      cd.load(datafilepath)
     # PCounterオブジェクト作成
-    pc = PCounter(hw, cif, cd)
+    pc = PCounter(hw, plugin, cd)
     GLib.timeout_add(self.pollingInterval, pc.loop)
     # シグナルハンドラ設定
     def signal_handler(signum, stackframe):
       if signum == signal.SIGTERM:
-        cd.save(datafile)
-        sys.exit(1)
+        cd.save(datafilepath)
+        sys.exit(128)
     signal.signal(signal.SIGTERM, signal_handler)
     # メインループ
     try:
@@ -77,5 +74,5 @@ class App(object):
     except KeyboardInterrupt:
       pass
     finally:
-      cd.save(datafile)
+      cd.save(datafilepath)
     return 0

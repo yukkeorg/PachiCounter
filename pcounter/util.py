@@ -3,6 +3,22 @@
 def bit_is_enable(val, bit):
   return bool(val & (1 << bit))
 
+def ordering(n):
+  less100 = n % 100
+  less10 = less100 % 10
+  if less10 in (1, 2, 3) and not (10 <= less100 < 20):
+    t = str(n) +  ('st', 'nd', 'rd')[less10 - 1]
+  else:
+    t = str(n) + 'th'
+  return t
+
+def bulk_set_color(d, color):
+  for k in d:
+    d[k]['color'] = color
+
+def rgb(r, g, b, a=0xff):
+    return (a << 24) + (r << 16) + (g << 8) + b
+
 def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):
   if zero_color is None:
     zero_color = '#888888'

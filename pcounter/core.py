@@ -4,7 +4,6 @@
 import sys
 import time
 import logging
-from collections import Counter
 try:
   import ujson as json
 except ImportError:
@@ -61,14 +60,14 @@ class CountData(object):
 
 
 class PCounter(object):
-  def __init__(self, hr, counterif, countdata, eol=None, output=None):
+  def __init__(self, hr, cif, countdata, eol=None, output=None):
     if not isinstance(hr, HwReceiver):
-      raise TypeError(u"hwreceiver は HwReceiver のインスタンスではありません。")
-    if not isinstance(counterif, ICounter):
-      raise TypeError(u"counterif は ICounter のインスタンスではありません。")
+      raise TypeError(u"hr は HwReceiver のインスタンスではありません。")
+    if not isinstance(cif, ICounter):
+      raise TypeError(u"cif は ICounter のインスタンスではありません。")
 
     self.hr = hr
-    self.counterif = counterif
+    self.cif = cif
     self.eol = '\0' if eol is None else eol
     self.output = output or sys.stdout
     self.countdata = countdata
@@ -85,14 +84,14 @@ class PCounter(object):
       if edgeup == True and state == False:
         # 調査中ビットの状態が0->1になるとき
         self.__switch |= checkbit
-        self.counterif.func_to_on(bit, portval, self.countdata)
+        self.cif.on(bit, portval, self.countdata)
       elif edgeup == False and state == True:
         # 調査中ビットの状態が1->0になるとき
         self.__switch &= (~checkbit)
-        self.counterif.func_to_off(bit, portval, self.countdata)
+        self.cif.off(bit, portval, self.countdata)
 
   def display(self):
-    countstr = self.counterif.func_output(self.countdata)
+    countstr = self.cif.build(self.countdata)
     if countstr != self.__prevcountstr:
         self.__prevcountstr = countstr
         self.output.write(countstr)
