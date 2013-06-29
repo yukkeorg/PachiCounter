@@ -1,15 +1,7 @@
 # coding: utf-8
 # vim: ts=2 sts=2 sw=2 et
 
-try:
-  import ujson as json
-except ImportError:
-  try:
-    import simplejson as json
-  except ImportError:
-    import json
-
-from pcounter.core import USBIO_BIT, CountData
+from pcounter.core import USBIO_BIT, CountData, json
 from pcounter.plugin import ICounter
 from pcounter.util import gen_bonusrate, bit_is_enable
 
@@ -18,9 +10,9 @@ def init():
                 switchoff_handler,
                 output_handler)
   cd = CountData(('count', 'totalcount', 'bonus', 
-                  'chance', 'chain', 'chancetime',
+                  'chance', 'chain', 'chancetime', 'isbonus',
                   'sbonus'))
-  return ic, cd
+  return (ic, cd)
 
 
 def switchon_handler(cbtype, iostatus, cd):
@@ -28,24 +20,26 @@ def switchon_handler(cbtype, iostatus, cd):
     cd['count'] += 1
     if not bit_is_enable(iostatus, USBIO_BIT.CHANCE):
       cd['totalcount'] += 1
-
-  if cbtype == USBIO_BIT.BONUS:
+  elif cbtype == USBIO_BIT.BONUS:
     cd['bonus'] += 1
+    cd['isbonus'] = 1
     if bit_is_enable(iostatus, USBIO_BIT.CHANCE):   # チャンス中なら
       cd['chain'] += 1
-
-  if cbtype == USBIO_BIT.CHANCE:
+  elif cbtype == USBIO_BIT.CHANCE:
     cd['chance'] += 1
     #history.append((None, cd.counts[COUNT_INDEX.COUNT]))
-
-  if cbtype == USBIO_BIT.SBONUS:
+  elif cbtype == USBIO_BIT.SBONUS:
     cd['sbonus'] += 1
 
 
 def switchoff_handler(cbtype, iostatus, cd):
   if cbtype == USBIO_BIT.BONUS:
+    cd['isbonus'] = 0
     cd['count'] = 0
-  if cbtype == USBIO_BIT.CHANCE:
+    if bit_is_enable(iostatus, USBIO_BIT.CHANCE):   # チャンス中なら
+      cd['chancetime'] = 1
+  elif cbtype == USBIO_BIT.CHANCE:
+    cd['count'] = 0
     cd['chain'] = 0
     cd['chancetime'] = 0
 
@@ -53,26 +47,33 @@ def switchoff_handler(cbtype, iostatus, cd):
 def output_handler(cd):
   d = cd.counts
   bonusrate = gen_bonusrate(d['totalcount'], d['chance'])
-  if d['chancetime'] == 1:
+  if cd['chancetime'] == 1: 
     chainstr = "STEALTH RUSH - {0} Bonus".format(_ordering(d['chain']))
     color = _rgb(0xff, 0xff, 0x33)
-    d = {
-      '8'  : { 'text': '{count} OF 99'.format(**d), 'color': color },
-      '9'  : { 'text': bonusrate, 'color': color},
-      '10' : { 'text': '{bonus} / {chance}'.format(**d), 'color': color },
-      '11' : { 'text': chainstr, 'color': color }
+    dd = {
+      '8'  : { 'text': '{count} <small>OF</small> 99'.format(**d)},
+      '9'  : { 'text': bonusrate,},
+      '10' : { 'text': '{bonus} / {chance}'.format(**d)},
+      '11' : { 'text': chainstr}
     }
   else:
-    color = _rgb(0xff, 0xff, 0xff)
-    d = {
-      '8'  : { 'text': '{count} / {totalcount}'.format(**d), 'color': color },
-      '9'  : { 'text': bonusrate, 'color': color},
-      '10' : { 'text': '{bonus} / {chain}'.format(**d), 'color': color },
+    if cd['isbonus'] == 1:
+      color = _rgb(0xff, 0xff, 0x33)
+    else:
+      color = _rgb(0xff, 0xff, 0xff)
+    dd = {
+      '8'  : { 'text': '{count} / {totalcount}'.format(**d) },
+      '9'  : { 'text': bonusrate },
+      '10' : { 'text': '{bonus} / {chance}'.format(**d) },
       '11' : { 'text': ' ' }
     }
+  _bulk_set_color(dd, color)
+  return json.dumps(dd)
 
-  return json.dumps(d)
 
+def _bulk_set_color(d, color):
+  for k in d:
+    d[k]['color'] = color
 
 def _rgb(r, g, b, a=0xff):
     return (a << 24) + (r << 16) + (g << 8) + b

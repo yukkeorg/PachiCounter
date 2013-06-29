@@ -1,7 +1,9 @@
 # coding: utf-8
+# vim: ts=2 sts=2 sw=2 et
 
 import os
 import sys
+import signal
 import errno
 import optparse
 import logging
@@ -48,7 +50,7 @@ class App(object):
       return 1
     machine = args[0]
     # ハードウエアレシーバオブジェクト作成
-    hw = hwreceiverFactory("dummy")
+    hw = hwreceiverFactory("usbio")
     # 設定ファイル保存ディレクトリとファイルのパスを生成
     make_resourcedir(self.resourcedir)
     datafile = os.path.join(self.resourcedir, machine)
@@ -56,11 +58,19 @@ class App(object):
     loader = CounterPluginLoader(self.basedir, 'machines')
     mod = loader.get(machine)
     cif, cd = mod.init()
-    if opt.reset == False:
+    if opt.reset == True:
+      pass
+    else:
       cd.load(datafile)
     # PCounterオブジェクト作成
     pc = PCounter(hw, cif, cd)
     GLib.timeout_add(self.pollingInterval, pc.loop)
+    # シグナルハンドラ設定
+    def signal_handler(signum, stackframe):
+      if signum == signal.SIGTERM:
+        cd.save(datafile)
+        sys.exit(1)
+    signal.signal(signal.SIGTERM, signal_handler)
     # メインループ
     try:
       GLib.MainLoop().run()

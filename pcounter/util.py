@@ -6,22 +6,19 @@ def bit_is_enable(val, bit):
 def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):
   if zero_color is None:
     zero_color = '#888888'
-  last_zero_pos = min_disp_digit - len(str(num))
-  last_zero_pos = last_zero_pos if last_zero_pos >= 0 else 0
+  last_zero_pos = max(min_disp_digit - len(str(num)), 0)
   raw_num_str = '{{0:0{0}}}'.format(min_disp_digit).format(num)
 
   if num_color is None:
     num_fmt = str(num)
   else:
     num_fmt = ('<span color="{0}">{1}</span>'
-                    .format(num_color,
-                            raw_num_str[last_zero_pos:]))
+                    .format(num_color, raw_num_str[last_zero_pos:]))
   if last_zero_pos == 0:
     zero_fmt = ''
   else:
     zero_fmt = ('<span color="{0}">{1}</span>'
-                      .format(zero_color,
-                              raw_num_str[0:last_zero_pos]))
+                      .format(zero_color, raw_num_str[0:last_zero_pos]))
   return ''.join((zero_fmt, num_fmt))
 
 

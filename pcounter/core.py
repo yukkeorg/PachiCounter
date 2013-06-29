@@ -17,14 +17,11 @@ from hwr import HwReceiver
 from plugin import ICounter
 from pctypes import enum
 
-USBIO_BIT = enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 'LAST')
-
-N_BITS = USBIO_BIT.LAST
-BITMASK = (1 << USBIO_BIT.LAST) - 1
-BITSHIFT = USBIO_BIT.LAST
-
 logger = logging.getLogger("PCounter")
 
+USBIO_BIT = enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 'LAST')
+N_BITS = USBIO_BIT.LAST
+BITMASK = (1 << USBIO_BIT.LAST) - 1
 
 class PCounterError(Exception): pass
 
@@ -108,4 +105,5 @@ class PCounter(object):
       self.__prevportval = portval
       self.countup(portval)
       self.display()
+    return True
 
