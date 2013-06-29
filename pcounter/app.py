@@ -10,9 +10,9 @@ import logging
 
 from gi.repository import GLib
 
-from core import PCounter, CountData
-from hwr import hwreceiverFactory
-from plugin import PluginLoader
+from pcounter.core import PCounter, CountData
+from pcounter.hwr import hwreceiverFactory
+from pcounter.plugin import PluginLoader
 
 logger = logging.getLogger("PCounter")
 logger.setLevel(logging.DEBUG)

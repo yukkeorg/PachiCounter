@@ -1,8 +1,8 @@
 # coding: utf-8
 # vim: ts=2 sts=2 sw=2 et
 
-from hwreceiver import HwReceiver, HwReceiverError
-from pyusbio import pyusbio
+from pcounter.hwr.hwreceiver import HwReceiver, HwReceiverError
+from pcounter.hwr.pyusbio import pyusbio
 
 class UsbIoReceiver(HwReceiver):
   def __init__(self, invert=True):

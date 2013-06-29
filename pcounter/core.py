@@ -12,9 +12,9 @@ except ImportError:
   except ImportError:
     import json
 
-from hwr import HwReceiver
-from plugin import ICounter
-from pctypes import enum
+from pcounter.hwr import HwReceiver
+from pcounter.plugin import ICounter
+from pcounter.pctypes import enum
 
 logger = logging.getLogger("PCounter")
 
@@ -44,7 +44,8 @@ class CountData(object):
 
   def save(self, filename):
     with open(filename, 'wb') as fp:
-      json.dump(self.__dict__, fp)
+      s = json.dumps(self.__dict__)
+      fp.write(s.encode('utf-8'))
 
   def load(self, filename):
     with open(filename, 'rb') as fp:
@@ -93,10 +94,10 @@ class PCounter(object):
   def display(self):
     countstr = self.cif.build(self.countdata)
     if countstr != self.__prevcountstr:
-        self.__prevcountstr = countstr
-        self.output.write(countstr)
-        self.output.write(self.eol)
-        self.output.flush()
+      self.__prevcountstr = countstr
+      self.output.write(countstr)
+      self.output.write(self.eol)
+      self.output.flush()
 
   def loop(self):
     portval = self.hr.get_port_value()
