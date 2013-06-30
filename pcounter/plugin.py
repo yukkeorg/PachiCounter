@@ -39,7 +39,8 @@ class ICounter(object):
 class UtilsMixin(object):
   def bulk_set_color(self, d, color):
     for k in d:
-      d[k]['color'] = color
+      if isinstance(d[k], dict):
+        d[k]['color'] = color
 
   def rgb2int(self, r, g, b, a=0xff):
       return (a << 24) + (r << 16) + (g << 8) + b

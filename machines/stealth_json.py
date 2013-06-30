@@ -19,7 +19,7 @@ class stealth_json(ICounter, UtilsMixin):
     elif cbtype == USBIO_BIT.BONUS:
       cd['bonus'] += 1
       cd['isbonus'] = 1
-      if bit_is_enable(iostatus, USBIO_BIT.CHANCE):   # チャンス中なら
+      if bit_is_enable(iostatus, USBIO_BIT.CHANCE):   # チャンス中
         cd['chain'] += 1
     elif cbtype == USBIO_BIT.CHANCE:
       cd['chance'] += 1
@@ -31,7 +31,7 @@ class stealth_json(ICounter, UtilsMixin):
     if cbtype == USBIO_BIT.BONUS:
       cd['isbonus'] = 0
       cd['count'] = 0
-      if bit_is_enable(iostatus, USBIO_BIT.CHANCE):   # チャンス中なら
+      if bit_is_enable(iostatus, USBIO_BIT.CHANCE):   # チャンス中
         cd['chancetime'] = 1
     elif cbtype == USBIO_BIT.CHANCE:
       cd['count'] = 0
