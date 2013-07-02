@@ -43,25 +43,30 @@ class stealth_json(ICounter, UtilsMixin):
     d = cd.counts
     bonusrate = gen_bonusrate(d['totalcount'], d['chance'])
     if cd['chancetime'] == 1: 
-      chainstr = "STEALTH RUSH - {0} Bonus".format(_ordering(d['chain']))
+      chainstr = "STEALTH RUSH - {0} Bonus".format(self.ordering(d['chain']))
       color = self.rgb2int(0xff, 0xff, 0x33)
       dd = {
+        'framesvg': 'resource/orangeflame_wide.svg',
         '8'  : { 'text': '{count} <small>OF</small> 99'.format(**d)},
         '9'  : { 'text': bonusrate,},
         '10' : { 'text': '{bonus} / {chance}'.format(**d)},
         '11' : { 'text': chainstr}
       }
+      self.bulk_set_color(dd, color)
+      dd['8']['color'] = self.rgb2int(0, 0, 0)
     else:
-      if cd['isbonus'] == 1:
-        color = self.rgb2int(0xff, 0xff, 0x33)
-      else:
-        color = self.rgb2int(0xff, 0xff, 0xff)
       dd = {
+        'framesvg': 'resource/blueflame_wide.svg',
         '8'  : { 'text': '{count} / {totalcount}'.format(**d) },
         '9'  : { 'text': bonusrate },
         '10' : { 'text': '{bonus} / {chance}'.format(**d) },
         '11' : { 'text': ' ' }
       }
-    self.bulk_set_color(dd, color)
+      if cd['isbonus'] == 1:
+        dd['framesvg'] = 'resource/orangeflame_wide.svg'
+        self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
+        dd['8']['color'] = self.rgb2int(0, 0, 0)
+      else:
+        self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0xff))
     return json.dumps(dd)
 
