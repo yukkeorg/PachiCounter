@@ -27,7 +27,6 @@ class xfiles_json(ICounter, UtilsMixin):
           pass
         elif cd['chain'] == 2:
           cd['xr'] += 1
-          history.append(('XR', cd['count']))
     if cbittype == USBIO_BIT.CHANCE:
       cd['chance'] += 1
     if cbittype == USBIO_BIT.SBONUS:

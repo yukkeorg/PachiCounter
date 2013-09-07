@@ -47,7 +47,7 @@ class vb_json(ICounter, UtilsMixin):
         '8'  : {'text': '{count} / {chancegames}'.format(**cd.counts) },
         '9'  : {'text': bonus_rate },
         '10' : {'text': '{bonus} / {chance}'.format(**cd.counts) },
-        '11' : {'text': '{0} VAT - {chain} Bonus(s)'.format(vat, **cd.counts) }
+        '11' : {'text': '{0} VAT - {chain} Bonus'.format(vat, **cd.counts) }
       }
       self.bulk_set_color(dd, color)
       dd['8']['color'] = self.rgb2int(0, 0, 0)

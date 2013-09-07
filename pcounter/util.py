@@ -41,10 +41,13 @@ def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):
 def gen_bonusrate(total, now, numesize=None):
   numesize = numesize or "small"
   try:
-    bonus_rate = ('<span size="{1}">1/</span>{0:.1f}'
-                        .format(float(total)/now, numesize))
+    p = float(total)/now
+    d = int(p)
+    f = int((p - d) * 1000.0)
+    bonus_rate = ('<span size="{2}">1/</span>{0}<small>.{1:03}</small>'
+                        .format(d, f, numesize))
   except ZeroDivisionError:
-    bonus_rate = ('<span size="{0}">1/</span>-.-'
+    bonus_rate = ('<span size="{0}">1/</span>-.<small>---</small>'
                       .format(numesize))
   return bonus_rate
 
