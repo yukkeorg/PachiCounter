@@ -29,7 +29,7 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
 例
 --
-   $ ./pcounter.py -t xfiles
+    $ ./pcounter.py -t xfiles
 
 ライセンス
 ----------
