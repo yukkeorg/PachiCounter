@@ -33,5 +33,4 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
 ライセンス
 ----------
-2-clause BSD Licence.  
-詳しくは、LICENSE.txtを参照してください。
+MIT License
