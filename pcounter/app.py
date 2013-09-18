@@ -29,6 +29,7 @@ class App(object):
     self.resourcedir = os.path.expanduser(resourcedir)
 
   def make_resourcedir(self):
+    """ リソースディレクトリを作成する """
     try:
       os.makedirs(self.resourcedir)
     except OSError as e:
@@ -38,6 +39,8 @@ class App(object):
         raise
 
   def parse_commandline(self, args):
+    """ コマンドラインをパースする """
+    try:
     parse = optparse.OptionParser()
     parse.add_option("-r", "--reset", dest="reset", action="store_true")
     return parse.parse_args(args)
