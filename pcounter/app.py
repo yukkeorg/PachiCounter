@@ -18,14 +18,6 @@ logger = logging.getLogger("PCounter")
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
 
-def make_resourcedir(d):
-  try:
-    os.makedirs(d)
-  except OSError as e:
-    if e.errno == errno.EEXIST:
-      pass
-    else:
-      raise
 
 class App(object):
   def __init__(self, basedir, pollingInterval=None, resourcedir=None):
@@ -35,6 +27,15 @@ class App(object):
     self.basedir = basedir
     self.pollingInterval = pollingInterval
     self.resourcedir = os.path.expanduser(resourcedir)
+
+  def make_resourcedir(self):
+    try:
+      os.makedirs(self.resourcedir)
+    except OSError as e:
+      if e.errno == errno.EEXIST:
+        pass
+      else:
+        raise
 
   def parse_commandline(self, args):
     parse = optparse.OptionParser()
@@ -49,7 +50,7 @@ class App(object):
       return 1
     machine = args[0]
     # 設定ファイル保存ディレクトリとファイルのパスを生成
-    make_resourcedir(self.resourcedir)
+    self.make_resourcedir()
     datafilepath = os.path.join(self.resourcedir, machine)
     # ハードウエアレシーバオブジェクト作成
     hw = hwreceiverFactory("usbio")
@@ -57,16 +58,15 @@ class App(object):
     loader = PluginLoader(self.basedir, 'machines')
     plugin = loader.get(machine)()
     cd = plugin.createCountData()
-    if opt.reset != True:
+    if not opt.reset == True:
       cd.load(datafilepath)
     # PCounterオブジェクト作成
     pc = PCounter(hw, plugin, cd)
     GLib.timeout_add(self.pollingInterval, pc.loop)
     # シグナルハンドラ設定
     def signal_handler(signum, stackframe):
-      if signum == signal.SIGTERM:
-        cd.save(datafilepath)
-        sys.exit(128)
+      cd.save(datafilepath)
+      sys.exit(128)
     signal.signal(signal.SIGTERM, signal_handler)
     # メインループ
     try:
