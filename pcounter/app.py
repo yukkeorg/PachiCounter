@@ -40,7 +40,6 @@ class App(object):
 
   def parse_commandline(self, args):
     """ コマンドラインをパースする """
-    try:
     parse = optparse.OptionParser()
     parse.add_option("-r", "--reset", dest="reset", action="store_true")
     return parse.parse_args(args)
@@ -67,10 +66,10 @@ class App(object):
     pc = PCounter(hw, plugin, cd)
     GLib.timeout_add(self.pollingInterval, pc.loop)
     # シグナルハンドラ設定
-    def signal_handler(signum, stackframe):
-      cd.save(datafilepath)
-      sys.exit(128)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # def signal_handler(signum, stackframe):
+    #   cd.save(datafilepath)
+    #   sys.exit(128)
+    # signal.signal(signal.SIGTERM, signal_handler)
     # メインループ
     try:
       GLib.MainLoop().run()
