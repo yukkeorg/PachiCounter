@@ -15,4 +15,5 @@ sys.path.insert(0, BASEDIR)
 
 from pcounter.app import App
 
-sys.exit(App(BASEDIR).main(sys.argv[1:]))
+app = App(BASEDIR)
+sys.exit(app.main())

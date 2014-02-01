@@ -21,8 +21,8 @@ logger.addHandler(logging.StreamHandler())
 
 class App(object):
   def __init__(self, basedir, pollingInterval=None, resourcedir=None):
-    resourcedir = u"~/.pcounter.d" if resourcedir is None else resourcedir
-    pollingInterval = 50 if pollingInterval is None else pollingInterval
+    resourcedir = resourcedir or u"~/.pcounter.d" 
+    pollingInterval = pollingInterval or 50
 
     self.basedir = basedir
     self.pollingInterval = pollingInterval
@@ -44,13 +44,18 @@ class App(object):
     parse.add_option("-r", "--reset", dest="reset", action="store_true")
     return parse.parse_args(args)
 
-  def main(self, args):
+  def main(self, args=None):
     # コマンドラインオプションをパース
+    if args is None:
+      args = sys.argv[1:]
     opt, args = self.parse_commandline(args)
+
     if len(args) == 0:
       logger.error("カウント対象機種を指定されていません。")
       return 1
+
     machine = args[0]
+
     # 設定ファイル保存ディレクトリとファイルのパスを生成
     self.make_resourcedir()
     datafilepath = os.path.join(self.resourcedir, machine)
@@ -62,19 +67,33 @@ class App(object):
     cd = plugin.createCountData()
     if not opt.reset == True:
       cd.load(datafilepath)
+
+    loop = GLib.MainLoop()
+    exit_code = 0
+
     # PCounterオブジェクト作成
     pc = PCounter(hw, plugin, cd)
     GLib.timeout_add(self.pollingInterval, pc.loop)
+
     # シグナルハンドラ設定
-    # def signal_handler(signum, stackframe):
-    #   cd.save(datafilepath)
-    #   sys.exit(128)
-    # signal.signal(signal.SIGTERM, signal_handler)
+    if sys.platform != 'win32':
+      def signal_handler(user_data):
+        loop.quit()
+        exit_code = 127
+      GLib.unix_signal_add(GLib.PRIORITY_DEFAULT,
+                           signal.SIGTERM,
+                           signal_handler,
+                           None)
+
     # メインループ
     try:
-      GLib.MainLoop().run()
+      loop.run()
     except KeyboardInterrupt:
       pass
     finally:
       cd.save(datafilepath)
-    return 0
+      print("""
+            Counter data is saved to {}""".format(datafilepath),
+            file=sys.stderr)
+
+    return exit_code
