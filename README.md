@@ -12,8 +12,9 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
 必要なソフトウエア
 -----------------
-- Python 2.7 or later (not 3.0)
-- PyUSB
+- Python >=2.7 or >=3.3
+- PyGObject
+- PyUSB(libusb-1.0)
 - PyUSBIO
   - https://github.com/yukkeorg/pyusbio
 
@@ -22,14 +23,20 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 --------
     $ ./pcounter.py [option] [machine_name]
 
+
 オプション
 ----------
--n
+-r
 : カウンタをリセットした状態で起動します。
 
 例
 --
-    $ ./pcounter.py -t xfiles
+    $ ./pcounter.py xfiles
+
+制限
+----
+- イベントループにてGLibを利用しているため、GLibがインストールされている環境でのみ動作します。(これは近く改善する予定)
+
 
 ライセンス
 ----------
