@@ -25,15 +25,27 @@ BITMASK = (1 << USBIO_BIT.LAST) - 1
 class PCounterError(Exception): pass
 
 class CountData(object):
-  def __init__(self, colnames):
-    self.counts = dict((k, 0) for k in colnames)
+  def __init__(self, colnames=None):
+    if colnames is None:
+      colnames = []
+    self.counts = dict.fromkeys(colnames, 0)
     self.history = []
 
   def __getitem__(self, key):
     return self.counts[key]
 
   def __setitem__(self, key, val):
-    self.counts[key] = val
+    if key in self.counts:
+      self.counts[key] = val
+
+  def appendCounter(self, key):
+    if key in self.counts:
+      return
+    self.counts[key] = 0
+
+  def resetAll(self):
+    self.resetCounter()
+    self.resetHistory()
 
   def resetCounter(self):
     for k in self.counts:
