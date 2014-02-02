@@ -6,7 +6,7 @@ from pcounter.plugin import ICounter, UtilsMixin
 from pcounter.util import (gen_bonusrate, bit_is_enable)
 
 
-class vb_json(ICounter, UtilsMixin):
+class vb(ICounter, UtilsMixin):
   FALLDOWN_POSSIBILITY = 1/338.5
 
   def createCountData(self):

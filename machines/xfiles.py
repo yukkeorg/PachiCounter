@@ -5,7 +5,7 @@ from pcounter.core import json, CountData, USBIO_BIT
 from pcounter.plugin import ICounter, UtilsMixin
 from pcounter.util import (gen_bonusrate, bit_is_enable)
 
-class xfiles_json(ICounter, UtilsMixin):
+class xfiles(ICounter, UtilsMixin):
   def createCountData(self):
     return CountData(('count', 'totalcount', 'chancegames', 
                       'normalgames', 'bonus', 'sbonus', 

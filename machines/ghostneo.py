@@ -5,7 +5,7 @@ from pcounter.core import USBIO_BIT, CountData, json
 from pcounter.plugin import ICounter, UtilsMixin
 from pcounter.util import gen_bonusrate, bit_is_enable
 
-class gn_json(ICounter, UtilsMixin):
+class ghostneo(ICounter, UtilsMixin):
   MAX_CHANCE_TIME = 100
 
   def createCountData(self):

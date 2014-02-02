@@ -5,7 +5,7 @@ from pcounter.core import USBIO_BIT, CountData, json
 from pcounter.plugin import ICounter, UtilsMixin
 from pcounter.util import gen_bonusrate, bit_is_enable
 
-class stealth_json(ICounter, UtilsMixin):
+class stealth(ICounter, UtilsMixin):
   def createCountData(self):
     return CountData(('count', 'totalcount', 'bonus', 
                     'chance', 'chain', 'chancetime', 'isbonus',
