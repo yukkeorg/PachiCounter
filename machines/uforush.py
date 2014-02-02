@@ -59,10 +59,10 @@ class uforush(ICounter, UtilsMixin):
     self.bonustime = DeltaTime()
 
   def createCountData(self):
-    return CountData(('count', 'totalcount', 'bonus',
-                      'chance', 'chain', 'chancetime',
-                      'isbonus', 'sbonus', 'spg', 'spb',
-                      'pbr', 'voutput'))
+    return CountData(("count", "totalcount", "bonus",
+                      "chance", "chain", "chancetime",
+                      "isbonus", "sbonus", "spg", "spb",
+                      "pbr", "voutput"))
 
   def detectBonus(self, t):
     for bi in self.BonusRound:
@@ -73,77 +73,77 @@ class uforush(ICounter, UtilsMixin):
     ischance = bit_is_enable(iostatus, USBIO_BIT.CHANCE)
 
     if cbtype == USBIO_BIT.COUNT:
-      cd['count'] += 1
+      cd["count"] += 1
       if not ischance:
-        cd['totalcount'] += 1
+        cd["totalcount"] += 1
 
       d = self.gcdelta.getDelta()
-      cd['spg'] = d
-      cd['voutput'] += (min(self.MaxSPC, d)
+      cd["spg"] = d
+      cd["voutput"] += (min(self.MaxSPC, d)
                          * self.LPS[int(ischance)])
 
     elif cbtype == USBIO_BIT.BONUS:
       self.bonustime.check()
-      cd['bonus'] += 1
-      cd['isbonus'] = 1
+      cd["bonus"] += 1
+      cd["isbonus"] = 1
       if ischance:
-        cd['chain'] += 1
+        cd["chain"] += 1
 
     elif cbtype == USBIO_BIT.CHANCE:
-      cd['chance'] += 1
-    elif cbtype == USBIO_BIT.SBONUS:
-      cd['sbonus'] += 1
+      cd["chance"] += 1
 
 
   def off(self, cbtype, iostatus, cd):
     ischance = bit_is_enable(iostatus, USBIO_BIT.CHANCE)
     if cbtype == USBIO_BIT.BONUS:
-      cd['isbonus'] = 0
-      cd['count'] = 0
+      cd["isbonus"] = 0
+      cd["count"] = 0
       if ischance:
-        cd['chancetime'] = 1
+        cd["chancetime"] = 1
 
       self.gcdelta.check()
       d = self.bonustime.getDelta()
       bi = self.detectBonus(d)
-      cd['spb'] = d
-      cd['pbr'] = bi.nround
-      cd['voutput'] += bi.gainpts
+      cd["spb"] = d
+      cd["pbr"] = bi.nround
+      cd["voutput"] += bi.gainpts
 
     elif cbtype == USBIO_BIT.CHANCE:
-      cd['chain'] = 0
-      cd['chancetime'] = 0
-      # cd['totalcount'] += cd['count']
+      cd["chain"] = 0
+      cd["chancetime"] = 0
+      # cd["totalcount"] += cd["count"]
 
 
   def build(self, cd):
     d = cd.counts
-    bonusrate = gen_bonusrate(d['totalcount'], d['chance'])
-    if cd['chancetime'] == 1: 
+    bonusrate = gen_bonusrate(d["totalcount"], d["chance"])
+    if cd["chancetime"] == 1: 
       color = self.rgb2int(0xff, 0xff, 0x33)
       dd = {
-        'framesvg0': 'resource/orangeflame_wide.svg',
-        '0'  : { 'text': '{count}<small></small>'.format(**d)},
-        '1'  : { 'text': '{chain}<small> CHAIN</small>'.format(**d)},
-        '2'  : { 'text': '{bonus}<small> ({chance})</small>'.format(**d) },
-        '3'  : { 'text': '{voutput:.0f}<small><small> PTS</small></small>'.format(**d)},
-        '4'  : { 'text': 'SPG:{spg:.2f} SPB:{spb:.2f} PBR:{pbr}r'.format(**d)},
+        "framesvg0": "resource/orangeflame_wide.svg",
+        "0"  : { "text": "{count}<small></small>" },
+        "1"  : { "text": "{chain}<small> CHAIN</small>" },
+        "2"  : { "text": "{bonus}<small> ({chance})</small>" },
+        "3"  : { "text": "{voutput:.0f}<small><small> PTS</small></small>" },
+        "4"  : { "text": "SPG:{spg:.2f} SPB:{spb:.2f} PBR:{pbr}r" },
       }
       self.bulk_set_color(dd, color)
-      dd['0']['color'] = self.rgb2int(0, 0, 0)
+      dd["0"]["color"] = self.rgb2int(0, 0, 0)
     else:
       dd = {
-        'framesvg0': 'resource/blueflame_wide.svg',
-        '0' : { 'text': '{count}<small> / {totalcount}</small>'.format(**d) },
-        '1' : { 'text': bonusrate },
-        '2' : { 'text': '{bonus}<small> ({chance})</small>'.format(**d) },
-        '3' : { 'text': '{voutput:.0f}<small><small> PTS</small></small>'.format(**d)},
-        '4' : { 'text': 'SPG:{spg:.2f} SPB:{spb:.2f} PBR:{pbr}r'.format(**d)},
+        "framesvg0": "resource/blueflame_wide.svg",
+        "0" : { "text": "{count}<small> / {totalcount}</small>" },
+        "1" : { "text": bonusrate },
+        "2" : { "text": "{bonus}<small> ({chance})</small>" },
+        "3" : { "text": "{voutput:.0f}<small><small> PTS</small></small>" },
+        "4" : { "text": "SPG:{spg:.2f} SPB:{spb:.2f} PBR:{pbr}r" },
       }
-      if cd['isbonus'] == 1:
-        dd['framesvg0'] = 'resource/orangeflame_wide.svg'
+      if cd["isbonus"] == 1:
+        dd["framesvg0"] = "resource/orangeflame_wide.svg"
         self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
-        dd['0']['color'] = self.rgb2int(0, 0, 0)
+        dd["0"]["color"] = self.rgb2int(0, 0, 0)
       else:
         self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0xff))
+
+    self.bulk_format_text(dd, **d)
     return json.dumps(dd)

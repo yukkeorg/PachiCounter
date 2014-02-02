@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Copyright (c) 2011-2012, Yusuke Ohshima
+# Pachi Counter
+#
+# Copyright (c) 2011-2014, Yusuke Ohshima
 # All rights reserved.
 #
-# This program is under the 2-clauses BSD License.
+# License: MIT.
 # For details, please see LICENSE file.
 
 import os

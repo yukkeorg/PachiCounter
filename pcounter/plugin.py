@@ -42,6 +42,12 @@ class UtilsMixin(object):
       if isinstance(d[k], dict):
         d[k]['color'] = color
 
+  def bulk_format_text(self, d, *args, **kw):
+    for k in d:
+      if isinstance(d[k], dict):
+        if 'text' in d[k]:
+          d[k]['text'] = d[k]['text'].format(*args, **kw)
+
   def rgb2int(self, r, g, b, a=0xff):
       return (a << 24) + (r << 16) + (g << 8) + b
 
