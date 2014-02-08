@@ -46,12 +46,12 @@ class vb(ICounter, UtilsMixin):
         "framesvg0" : "resource/orangeflame_wide.svg", 
         "0" : {"text": "{count}<small> / {chancegames}</small>" },
         "1" : {"text": bonus_rate },
-        "2" : {"text": "{bonus} / {chance}" },
-        "3" : {"text": " " },
-        "4" : {"text": "{0} VAT - {chain} Bonus" }
+        "2" : {"text": "<small>VAT </small>{chance} - {chain}<small> CHAIN</small>" },
+        "3" : {"text": "" },
+        "4" : {"text": "<small>TOTAL BONUS</small>   {bonus}" }
       }
       self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
-      dd["8"]["color"] = self.rgb2int(0, 0, 0)
+      dd["0"]["color"] = self.rgb2int(0, 0, 0)
     else:
       color = self.rgb2int(0xff, 0xff, 0xff)
       bonus_rate = gen_bonusrate(cd["normalgames"], cd["chance"])
@@ -59,10 +59,10 @@ class vb(ICounter, UtilsMixin):
         "framesvg0" : "resource/blueflame_wide.svg",
         "0" : {"text": "{count}<small> / {normalgames}</small>" },
         "1" : {"text": bonus_rate },
-        "2" : {"text": "{bonus} / {chance}" },
+        "2" : {"text": "<small>BONUS</small>  {bonus}<small> ({chance})</small>" },
         "3" : {"text": "" },
         "4" : {"text": "" }
       }
       self.bulk_set_color(dd, color)
-    self.buld_format_text(dd, **cd.counts)
+    self.bulk_format_text(dd, **cd.counts)
     return json.dumps(dd)

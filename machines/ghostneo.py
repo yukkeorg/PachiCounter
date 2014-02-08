@@ -48,27 +48,29 @@ class ghostneo(ICounter, UtilsMixin):
     if cd['chancetime'] == 1: 
       color = self.rgb2int(0xff, 0xff, 0x33)
       dd = {
-        'framesvg': 'resource/orangeflame_wide.svg',
-        '8'  : { 'text': '{count}'.format(**d)},
-        '9'  : { 'text': '<big>{chain}</big> chain'.format(**d),},
-        '10' : { 'text': '{bonus} / {chance}'.format(**d)},
-        '11' : { 'text': 'CHANCE TIME'}
+        'framesvg0': 'resource/orangeflame_wide.svg',
+        '0' : { 'text': '{count}' },
+        '1' : { 'text': '{chain}<small> chain</small>' },
+        '2' : { 'text': '{bonus}<small> ({chance})</small>' },
+        '4' : { 'text': 'CHANCE TIME'}
       }
       self.bulk_set_color(dd, color)
-      dd['8']['color'] = self.rgb2int(0, 0, 0)
+      dd['0']['color'] = self.rgb2int(0, 0, 0)
     else:
       dd = {
-        'framesvg': 'resource/blueflame_wide.svg',
-        '8'  : { 'text': '{count} / <small>{totalcount}</small>'.format(**d) },
-        '9'  : { 'text': bonusrate },
-        '10' : { 'text': '{bonus} / {chance}'.format(**d) },
-        '11' : { 'text': ' ' }
+        'framesvg0': 'resource/blueflame_wide.svg',
+        '0' : { 'text': '{count}<small> / {totalcount}</small>' },
+        '1' : { 'text': bonusrate },
+        '2' : { 'text': '{bonus}<small> ({chance})</small>' },
+        '4' : { 'text': ' ' }
       }
       if cd['isbonus'] == 1:
-        dd['framesvg'] = 'resource/orangeflame_wide.svg'
+        dd['framesvg0'] = 'resource/orangeflame_wide.svg'
         self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
-        dd['8']['color'] = self.rgb2int(0, 0, 0)
+        dd['0']['color'] = self.rgb2int(0, 0, 0)
       else:
         self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0xff))
+
+    self.bulk_format_text(dd, **d)
     return json.dumps(dd)
 
