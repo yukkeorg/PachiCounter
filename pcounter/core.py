@@ -22,41 +22,44 @@ USBIO_BIT = enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 'LAST')
 N_BITS = USBIO_BIT.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
 
+if sys.version_info[0] >= 3:
+  unicode = str
+
 class PCounterError(Exception): pass
 
 class CountData(object):
-  def __init__(self, colnames=None):
+  def __init__(self, colnames=None, *argnames):
     if colnames is None:
       colnames = []
-    self.counts = dict.fromkeys(colnames, 0)
-    self.history = []
+    elif isinstance(colnames, (str, unicode)):
+      colnames = [colnames]
+    else:
+      colnames = list(colnames)
+    colnames += argnames
+
+    self.__dict__['counts'] = dict.fromkeys(colnames, 0)
 
   def __getitem__(self, key):
-    return self.counts[key]
+    return self.__dict__['counts'][key]
 
   def __setitem__(self, key, val):
-    if key in self.counts:
-      self.counts[key] = val
+    if key in self.__dict__['counts']:
+      self.__dict__['counts'][key] = val
 
-  def appendCounter(self, key):
-    if key in self.counts:
-      return
-    self.counts[key] = 0
+  __getattr__ = __getitem__
 
-  def resetAll(self):
-    self.resetCounter()
-    self.resetHistory()
+  __setattr__ = __setitem__
 
-  def resetCounter(self):
-    for k in self.counts:
-      self.counts[k] = 0
+  def getdict(self):
+    return self.__dict__['counts']
 
-  def resetHistory(self):
-    del self.history[:]
+  def reset(self):
+    for k in self.__dict__['counts']:
+      self.__dict__['counts'][k] = 0
 
   def save(self, filename):
     with open(filename, 'wb') as fp:
-      s = json.dumps(self.__dict__)
+      s = json.dumps(self.__dict__['counts'])
       fp.write(s.encode('utf-8'))
 
   def load(self, filename):
@@ -65,11 +68,9 @@ class CountData(object):
         data = json.load(fp)
       except:
         return
-    if 'counts' in data:
-      self.counts.update(data['counts'])
-    if 'history' in data:
-      self.resetHistory()
-      self.history.extend(data['history'])
+    for k in data:
+      if k in self.__dict__['counts']:
+        self.__dict__['counts'][k] = data[k]
 
 
 class PCounter(object):
@@ -89,7 +90,7 @@ class PCounter(object):
     self.__prevportval = -1
 
   def countup(self, portval):
-    for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS, 
+    for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS,
                 USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
       checkbit = 1 << bit
       edgeup = bool(portval & checkbit)
@@ -118,4 +119,3 @@ class PCounter(object):
       self.countup(portval)
       self.display()
     return True
-

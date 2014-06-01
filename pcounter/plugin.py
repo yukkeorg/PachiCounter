@@ -2,6 +2,7 @@
 # vim: ts=2 sts=2 sw=2 et
 
 import os
+from pcounter.util import calcLpsOnNorm, calcLpsOnChance
 
 class PluginLoader(object):
   def __init__(self, basedir, plugindir):
@@ -22,8 +23,24 @@ class PluginLoader(object):
     return getattr(module, pluginname)
 
 
+class BonusRound(object):
+  def __init__(self, nround, limitsec, gainpts):
+    self.nround = nround
+    self.limitsec = limitsec
+    self.gainpts = gainpts
+
+
 class ICounter(object):
-  """ コールバックインターフェース """
+  LPS = (calcLpsOnNorm(3, 20),     # losepts/sec
+         calcLpsOnChance(0.90))
+  MaxSPC = 40.0   # sec/count
+  BonusRoundList = ()
+
+  def detectBonus(self, t):
+    for bi in self.BonusRoundList:
+      if t < bi.limitsec:
+        return bi
+
   def createCountData(self):
     raise NotImplemented()
 
@@ -35,6 +52,8 @@ class ICounter(object):
 
   def build(self, cd):
     raise NotImplemented()
+
+
 
 class UtilsMixin(object):
   def bulk_set_color(self, d, color):

@@ -78,3 +78,11 @@ def gen_history(history, n, sep=" ", isfill=False):
       a.append('')
   return sep.join(a[:n])
 
+
+def calcLpsOnNorm(bc, r):
+  return 1.6667 * (-1.0 + ((bc * r) / (250.0 + bc * r)))
+
+
+def calcLpsOnChance(base):
+  return 1.6667 * (-1.0 + base)
+
