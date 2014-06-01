@@ -1,21 +1,39 @@
 # coding: utf-8
 # vim: ts=2 sts=2 sw=2 et
 
+"""
+  Pachi Counter
+
+  Copyright (c) 2011-2014, Yusuke Ohshima
+  All rights reserved.
+
+  License: MIT.
+  For details, please see LICENSE file.
+"""
+
 import os
 import sys
 import signal
 import errno
 import optparse
-import logging
 
 from gi.repository import GLib
+
+if getattr(sys, "frozen", False):
+  # For freezer
+  BASEDIR = os.path.dirname(os.path.dirname(sys.executable))
+else:
+  BASEDIR = os.path.dirname(os.path.join(os.path.realpath(__file__), ".."))
+
+sys.path.insert(0, BASEDIR)
 
 from pcounter.core import PCounter, CountData
 from pcounter.hwr import hwReceiverFactory, HwReceiverError
 from pcounter.plugin import PluginLoader
 
+import logging
 logger = logging.getLogger("PCounter")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
@@ -65,27 +83,32 @@ class App(object):
       logger.critical(e)
       return 1
 
+    # 引数で指定され機種に対応したモジュールをインポートする
     loader = PluginLoader(self.basedir, "machines")
-    plugin = loader.get(machine)()
+    plugin_class = loader.get(machine)
+    plugin = plugin_class()
     cd = plugin.createCountData()
     if not opt.reset == True:
       cd.load(datafilepath)
 
-    loop = GLib.MainLoop()
 
     # PCounterオブジェクト作成
     pc = PCounter(hw, plugin, cd)
-    GLib.timeout_add(self.pollingInterval, pc.loop)
+
+    # メインループオブジェクト作成
+    loop = GLib.MainLoop()
 
     # シグナルハンドラ設定
     if sys.platform != "win32":
       def signal_handler(user_data):
         loop.quit()
+
       GLib.unix_signal_add(GLib.PRIORITY_DEFAULT,
                            signal.SIGTERM,
                            signal_handler,
                            None)
 
+    GLib.timeout_add(self.pollingInterval, pc.loop)
     # メインループ
     try:
       loop.run()
@@ -96,3 +119,8 @@ class App(object):
       logger.info("Counter data is saved to {}".format(datafilepath))
 
     return 0
+
+
+
+if __name__ == "__main__":
+  sys.exit(App(BASEDIR).main())
