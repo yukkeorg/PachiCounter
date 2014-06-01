@@ -14,14 +14,17 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 -----------------
 - Python >=2.7 or >=3.3
 - PyGObject
-- PyUSB(libusb-1.0)
+- PyUSB and libusb-1.0
+- SimpleJSON
 - PyUSBIO
   - https://github.com/yukkeorg/pyusbio
 
 
-起動方法
---------
-    $ ./pcounter.py [option] [machine_name]
+クイックスタート
+----------------
+    $ git clone https://github.com/yukkeorg/PachiCounter.git
+    $ cd PachiCounter
+    $ python pcounter/app.py [option] [machine_name]
 
 
 オプション
@@ -29,9 +32,6 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 -r
 : カウンタをリセットした状態で起動します。
 
-例
---
-    $ ./pcounter.py xfiles
 
 制限
 ----
