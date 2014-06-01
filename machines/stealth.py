@@ -46,26 +46,26 @@ class stealth(ICounter, UtilsMixin):
       chainstr = "STEALTH RUSH - {0} Bonus".format(self.ordering(d['chain']))
       color = self.rgb2int(0xff, 0xff, 0x33)
       dd = {
-        'framesvg': 'resource/orangeflame_wide.svg',
-        '8'  : { 'text': '{count} <small>OF</small> 99'.format(**d)},
-        '9'  : { 'text': bonusrate,},
-        '10' : { 'text': '{bonus} / {chance}'.format(**d)},
-        '11' : { 'text': chainstr}
+        'framesvg0': 'resource/orangeflame_wide.svg',
+        '0' : { 'text': '{count} <small>OF</small> 99'.format(**d)},
+        '1' : { 'text': bonusrate,},
+        '2' : { 'text': '{bonus} / {chance}'.format(**d)},
+        '4' : { 'text': chainstr}
       }
       self.bulk_set_color(dd, color)
-      dd['8']['color'] = self.rgb2int(0, 0, 0)
+      dd['0']['color'] = self.rgb2int(0, 0, 0)
     else:
       dd = {
-        'framesvg': 'resource/blueflame_wide.svg',
-        '8'  : { 'text': '{count} / {totalcount}'.format(**d) },
-        '9'  : { 'text': bonusrate },
-        '10' : { 'text': '{bonus} / {chance}'.format(**d) },
-        '11' : { 'text': ' ' }
+        'framesvg0': 'resource/blueflame_wide.svg',
+        '0' : { 'text': '{count} / {totalcount}'.format(**d) },
+        '1' : { 'text': bonusrate },
+        '2' : { 'text': '{bonus} / {chance}'.format(**d) },
+        '4' : { 'text': ' ' }
       }
       if cd['isbonus'] == 1:
-        dd['framesvg'] = 'resource/orangeflame_wide.svg'
+        dd['framesvg0'] = 'resource/orangeflame_wide.svg'
         self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
-        dd['8']['color'] = self.rgb2int(0, 0, 0)
+        dd['0']['color'] = self.rgb2int(0, 0, 0)
       else:
         self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0xff))
     return json.dumps(dd)
