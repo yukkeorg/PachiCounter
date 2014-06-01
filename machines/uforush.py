@@ -4,8 +4,9 @@
 import time
 
 from pcounter.core import USBIO_BIT, CountData, json
-from pcounter.plugin import ICounter, UtilsMixin
-from pcounter.util import gen_bonusrate, bit_is_enable
+from pcounter.plugin import ICounter, UtilsMixin, BonusRound
+from pcounter.util import (gen_bonusrate, bit_is_enable,
+                           calcLpsOnNorm, calcLpsOnChance)
 
 
 class DeltaTime(object):
@@ -22,36 +23,22 @@ class DeltaTime(object):
     self.__prev = time.time()
 
 
-class BonusRoundInfo(object):
-  def __init__(self, nround, limitsec, gainpts):
-    self.nround = nround
-    self.limitsec = limitsec
-    self.gainpts = gainpts
-
-
-def calcLpsOnNorm(bc, r):
-  return 1.6667 * (-1.0 + ((bc * r) / (250.0 + bc * r)))
-
-def calcLpsOnChance(base):
-  return 1.6667 * (-1.0 + base)
-
-
 class uforush(ICounter, UtilsMixin):
-  LPS = (calcLpsOnNorm(3, 20),     # losepts/sec
-         calcLpsOnChance(0.90))
+  NORMAL_LPS = calcLpsOnNorm(3, 20)     # losepts/sec
+  CHANCE_LPS = calcLpsOnChance(0.80)
 
-  MaxSPC = 40.0   # sec/count
+  MAX_SPC = 20.0   # sec/count
 
-  BonusRound = (
-    BonusRoundInfo(nround= 1, limitsec=  55.0, gainpts= 80),
-    BonusRoundInfo(nround= 2, limitsec=  65.0, gainpts=160),
-    BonusRoundInfo(nround= 3, limitsec=  76.0, gainpts=240),
-    BonusRoundInfo(nround= 4, limitsec=  88.0, gainpts=320),
-    BonusRoundInfo(nround= 5, limitsec= 100.0, gainpts=400),
-    BonusRoundInfo(nround= 6, limitsec= 110.0, gainpts=480),
-    BonusRoundInfo(nround= 7, limitsec= 120.0, gainpts=560),
-    BonusRoundInfo(nround= 8, limitsec= 136.0, gainpts=640),
-    BonusRoundInfo(nround=12, limitsec=9999.0, gainpts=960),
+  BonusRoundList = (
+    BonusRound(nround= 1, limitsec=  55.0, gainpts= 80),
+    BonusRound(nround= 2, limitsec=  65.0, gainpts=160),
+    BonusRound(nround= 3, limitsec=  76.0, gainpts=240),
+    BonusRound(nround= 4, limitsec=  88.0, gainpts=320),
+    BonusRound(nround= 5, limitsec= 100.0, gainpts=400),
+    BonusRound(nround= 6, limitsec= 110.0, gainpts=480),
+    BonusRound(nround= 7, limitsec= 120.0, gainpts=560),
+    BonusRound(nround= 8, limitsec= 136.0, gainpts=640),
+    BonusRound(nround=12, limitsec=9999.0, gainpts=960),
   )
 
   def __init__(self):
@@ -59,75 +46,73 @@ class uforush(ICounter, UtilsMixin):
     self.bonustime = DeltaTime()
 
   def createCountData(self):
-    return CountData(("count", "totalcount", "bonus",
-                      "chance", "chain", "chancetime",
-                      "isbonus", "sbonus", "spg", "spb",
-                      "pbr", "voutput"))
+    return CountData("count", "totalcount", "bonus",
+                     "chance", "chain", "chancetime",
+                     "isbonus", "sbonus", "spg", "spb",
+                     "pbr", "voutput")
 
-  def detectBonus(self, t):
-    for bi in self.BonusRound:
-      if t < bi.limitsec:
-        return bi
 
   def on(self, cbtype, iostatus, cd):
     ischance = bit_is_enable(iostatus, USBIO_BIT.CHANCE)
 
     if cbtype == USBIO_BIT.COUNT:
-      cd["count"] += 1
+      cd.count += 1
       if not ischance:
-        cd["totalcount"] += 1
+        cd.totalcount += 1
 
       d = self.gcdelta.getDelta()
-      cd["spg"] = d
-      cd["voutput"] += (min(self.MaxSPC, d)
-                         * self.LPS[int(ischance)])
+      cd.spg = d
+      cd.voutput += (min(self.MaxSPC, d)
+                     * (self.NORMAL_LPS if not ischance else self.CHANCE_LPS))
 
     elif cbtype == USBIO_BIT.BONUS:
       self.bonustime.check()
-      cd["bonus"] += 1
-      cd["isbonus"] = 1
+      cd.bonus += 1
+      cd.isbonus = 1
       if ischance:
-        cd["chain"] += 1
+        cd.chain += 1
 
     elif cbtype == USBIO_BIT.CHANCE:
-      cd["chance"] += 1
+      cd.chance += 1
 
 
   def off(self, cbtype, iostatus, cd):
     ischance = bit_is_enable(iostatus, USBIO_BIT.CHANCE)
     if cbtype == USBIO_BIT.BONUS:
-      cd["isbonus"] = 0
-      cd["count"] = 0
+      cd.isbonus = 0
+      cd.count = 0
       if ischance:
-        cd["chancetime"] = 1
+        cd.chancetime = 1
 
       self.gcdelta.check()
       d = self.bonustime.getDelta()
       bi = self.detectBonus(d)
-      cd["spb"] = d
-      cd["pbr"] = bi.nround
-      cd["voutput"] += bi.gainpts
+      cd.spb = d
+      cd.pbr = bi.nround
+      cd.voutput += bi.gainpts
 
     elif cbtype == USBIO_BIT.CHANCE:
-      cd["chain"] = 0
-      cd["chancetime"] = 0
-      # cd["totalcount"] += cd["count"]
+      cd.chain = 0
+      cd.chancetime = 0
+      cd.totalcount += cd.count
 
 
   def build(self, cd):
-    d = cd.counts
-    bonusrate = gen_bonusrate(d["totalcount"], d["chance"])
-    if cd["chancetime"] == 1: 
-      color = self.rgb2int(0xff, 0xff, 0x33)
+    bonusrate = gen_bonusrate(cd.totalcount, cd.chance)
+    if cd.chancetime == 1: 
       dd = {
         "framesvg0": "resource/orangeflame_wide.svg",
-        "0"  : { "text": "{count}<small></small>" },
-        "1"  : { "text": "{chain}<small> CHAIN</small>" },
-        "2"  : { "text": "{bonus}<small> ({chance})</small>" },
-        "3"  : { "text": "{voutput:.0f}<small><small> PTS</small></small>" },
-        "4"  : { "text": "SPG:{spg:.2f} SPB:{spb:.2f} PBR:{pbr}r" },
+        "0" : { "text": "{count}<small></small>" },
+        "1" : { "text": "{chain}<small><small> CHAIN</small></small>" },
+        "2" : { "text": "{bonus}<small> ({chance})</small>" },
+        "3" : { "text": "{voutput:.0f}<small><small> PTS</small></small>" },
+        "4" : { "text": "UFO CHANCE ({pbr}R)" },
       }
-      self.bulk_set_color(dd, color)
+
+      if cd.chain > 1:
+        dd["4"]["text"] = "UFO RUSH ({pbr}R)"
+
+      #self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
       dd["0"]["color"] = self.rgb2int(0, 0, 0)
     else:
       dd = {
@@ -136,14 +121,16 @@ class uforush(ICounter, UtilsMixin):
         "1" : { "text": bonusrate },
         "2" : { "text": "{bonus}<small> ({chance})</small>" },
         "3" : { "text": "{voutput:.0f}<small><small> PTS</small></small>" },
-        "4" : { "text": "SPG:{spg:.2f} SPB:{spb:.2f} PBR:{pbr}r" },
+        "4" : { "text": "{spg:.2f}sec/G" },
       }
-      if cd["isbonus"] == 1:
-        dd["framesvg0"] = "resource/orangeflame_wide.svg"
-        self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
-        dd["0"]["color"] = self.rgb2int(0, 0, 0)
-      else:
-        self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0xff))
+      self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0xff))
 
-    self.bulk_format_text(dd, **d)
+    if cd.isbonus == 1:
+      dd["framesvg0"] = "resource/orangeflame_wide.svg"
+      dd["4"]["text"] = "BONUS TIME"
+      #self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
+      dd["0"]["color"] = self.rgb2int(0, 0, 0)
+
+    self.bulk_format_text(dd, **(cd.getdict()))
+
     return json.dumps(dd)
