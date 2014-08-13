@@ -24,21 +24,21 @@ class DeltaTime(object):
 
 
 class uforush(ICounter, UtilsMixin):
-  NORMAL_LPS = calcLpsOnNorm(3, 20)     # losepts/sec
+  NORMAL_LPS = calcLpsOnNorm(3, 20)     # lose_pts/sec
   CHANCE_LPS = calcLpsOnChance(0.80)
 
   MAX_SPC = 20.0   # sec/count
 
   BonusRoundList = (
-    BonusRound(nround= 1, limitsec=  55.0, gainpts= 80),
-    BonusRound(nround= 2, limitsec=  65.0, gainpts=160),
-    BonusRound(nround= 3, limitsec=  76.0, gainpts=240),
-    BonusRound(nround= 4, limitsec=  88.0, gainpts=320),
-    BonusRound(nround= 5, limitsec= 100.0, gainpts=400),
-    BonusRound(nround= 6, limitsec= 110.0, gainpts=480),
-    BonusRound(nround= 7, limitsec= 120.0, gainpts=560),
-    BonusRound(nround= 8, limitsec= 136.0, gainpts=640),
-    BonusRound(nround=12, limitsec=9999.0, gainpts=960),
+    BonusRound(nround= 1, limitsec=  55.0, gainpts=  80),
+    BonusRound(nround= 2, limitsec=  65.0, gainpts= 160),
+    BonusRound(nround= 3, limitsec=  76.0, gainpts= 240),
+    BonusRound(nround= 4, limitsec=  88.0, gainpts= 320),
+    BonusRound(nround= 5, limitsec= 100.0, gainpts= 400),
+    BonusRound(nround= 6, limitsec= 110.0, gainpts= 480),
+    BonusRound(nround= 7, limitsec= 120.0, gainpts= 560),
+    BonusRound(nround= 8, limitsec= 136.0, gainpts= 640),
+    BonusRound(nround=12, limitsec=9999.0, gainpts= 960),
   )
 
   def __init__(self):
