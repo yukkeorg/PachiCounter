@@ -23,7 +23,7 @@ if getattr(sys, "frozen", False):
   # For freezer
   BASEDIR = os.path.dirname(os.path.dirname(sys.executable))
 else:
-  BASEDIR = os.path.dirname(os.path.join(os.path.realpath(__file__), ".."))
+  BASEDIR = os.path.dirname(os.path.realpath(os.path.join(__file__, "..")))
 
 sys.path.insert(0, BASEDIR)
 
