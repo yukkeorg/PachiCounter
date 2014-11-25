@@ -1,5 +1,5 @@
 # coding: utf-8
-# vim: ts=2 sts=2 sw=2 et
+# vim: ts=4 sts=4 sw=4 et
 
 """
     Pachi Counter
@@ -18,14 +18,6 @@ import errno
 import optparse
 
 from gi.repository import GLib
-
-if getattr(sys, "frozen", False):
-    # For freezer
-    BASEDIR = os.path.dirname(os.path.dirname(sys.executable))
-else:
-    BASEDIR = os.path.dirname(os.path.realpath(os.path.join(__file__, "..")))
-
-sys.path.insert(0, BASEDIR)
 
 from pcounter.core import PCounter
 from pcounter.hwr import hwReceiverFactory, HwReceiverError
@@ -84,8 +76,7 @@ class App(object):
 
         # 引数で指定され機種に対応したモジュールをインポートする
         loader = PluginLoader(self.basedir, "machines")
-        plugin_class = loader.get(machine)
-        plugin = plugin_class()
+        plugin = loader.getInstance(machine)
         cd = plugin.createCountData()
         if not opt.reset:
             cd.load(datafilepath)
@@ -116,7 +107,3 @@ class App(object):
             cd.save(datafilepath)
             logger.info("Counter data is saved to {}".format(datafilepath))
         return 0
-
-
-if __name__ == "__main__":
-    sys.exit(App(BASEDIR).main())

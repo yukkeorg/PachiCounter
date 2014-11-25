@@ -2,7 +2,10 @@
 # vim: ts=4 sts=4 sw=4 et
 
 from pcounter.hwr.hwreceiver import HwReceiver, HwReceiverError
-from pcounter.hwr.pyusbio import pyusbio
+try:
+    import pyusbio
+except ImportError:
+    from pcounter.hwr.pyusbio import pyusbio
 
 
 class UsbIoReceiver(HwReceiver):

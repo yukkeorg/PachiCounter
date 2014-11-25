@@ -8,7 +8,6 @@ dist
 build
 eggs
 parts
-bin
 var
 sdist
 develop-eggs
@@ -23,6 +22,3 @@ pip-log.txt
 
 #Translations
 *.mo
-
-#Mr Developer
-.mr.developer.cfg

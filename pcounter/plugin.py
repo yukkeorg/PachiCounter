@@ -15,13 +15,20 @@ class PluginLoader(object):
             if fname.endswith(".py") and not fname.startswith("__init__"):
                 self._pluginnames.append(fname.replace(u".py", u""))
 
-    def get(self, pluginname):
+    def getClass(self, pluginname):
         """ 指定されたプラグインをインポートしてその型を返す """
         if pluginname not in self._pluginnames:
             raise NameError("{0} is not found.".format(pluginname))
         imp = __import__(self._plugindir, {}, {}, [pluginname])
         module = getattr(imp, pluginname)
         return getattr(module, pluginname)
+
+    def getInstance(self, pluginname, args=None):
+        klass = self.getClass(pluginname)
+        if args is None:
+            return klass()
+        else:
+            return klass(args)
 
 
 class BonusRound(object):
