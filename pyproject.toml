@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pachicounter"
+version = "0.1.0"
+description = ""
+authors = ["Yusuke Ohshima <ohshima.yusuke@yukke.org>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pyusbio = {git = "https://github.com/yukkeorg/pyusbio.git"}
+
+[tool.poetry.dev-dependencies]
+
+
+[tool.poetry.scripts]
+pachicounter = "pachicounter.cli:main"
+
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

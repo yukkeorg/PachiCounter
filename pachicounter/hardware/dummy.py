@@ -1,7 +1,7 @@
 # coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
-from hwreceiver import HwReceiver, HwReceiverError
+from . import HwReceiver
 
 
 class DummyReceiver(HwReceiver):
@@ -10,4 +10,3 @@ class DummyReceiver(HwReceiver):
 
     def get_port_value(self):
         return 0xff
-

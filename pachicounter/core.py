@@ -1,4 +1,3 @@
-# coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
 import sys
@@ -15,12 +14,12 @@ from pcounter.hwr import HwReceiver
 from pcounter.plugin import ICounter
 from pcounter.pctypes import enum
 
-logger = logging.getLogger("PCounter")
+
+logger = logging.getLogger("PachiCounter")
 
 USBIO_BIT = enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 'LAST')
 N_BITS = USBIO_BIT.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
-
 if sys.version_info[0] >= 3:
     unicode = str
 
@@ -68,7 +67,7 @@ class CountData(object):
         with open(filename, 'rb') as fp:
             try:
                 data = json.load(fp)
-            except:
+            except Exception:
                 return
         for k in data:
             if k in self.__dict__['counts']:

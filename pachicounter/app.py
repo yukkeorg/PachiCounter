@@ -1,14 +1,11 @@
 # coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
-"""
-    Pachi Counter
-
-    Copyright (c) 2011-2014, Yusuke Ohshima
-    All rights reserved.
-
-    License: MIT.
-    For details, please see LICENSE file.
+"""\
+Pachi Counter
+Copyright (c) 2011-2020, Yusuke Ohshima All rights reserved.
+License: MIT.
+For details, please see LICENSE file.
 """
 
 import os
@@ -19,9 +16,9 @@ import optparse
 
 from gi.repository import GLib
 
-from pcounter.core import PCounter
-from pcounter.hwr import hwReceiverFactory, HwReceiverError
-from pcounter.plugin import PluginLoader
+from pachicounter.core import PCounter
+from pachicounter.hardware import hwReceiverFactory, HwReceiverError
+from pachicounter.plugin import PluginLoader
 
 import logging
 logger = logging.getLogger("PCounter")
@@ -75,7 +72,7 @@ class App(object):
             return 1
 
         # 引数で指定され機種に対応したモジュールをインポートする
-        loader = PluginLoader(self.basedir, "machines")
+        loader = PluginLoader(self.basedir, "machine")
         plugin = loader.getInstance(machine)
         cd = plugin.createCountData()
         if not opt.reset:

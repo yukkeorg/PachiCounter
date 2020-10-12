@@ -1,0 +1,35 @@
+[[package]]
+name = "pyusb"
+version = "1.1.0"
+description = "Python USB access module"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "pyusbio"
+version = "0.1.0"
+description = "USB0-IO2 control library for Python"
+category = "main"
+optional = false
+python-versions = "^3.6"
+
+[package.dependencies]
+pyusb = "^1.1.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/yukkeorg/pyusbio.git"
+reference = "master"
+resolved_reference = "9332e467c641355b9e9c8d79485ad194551d4a61"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "^3.6"
+content-hash = "0371404d5daabcd596d5c5183fcb601da5cba95e826a5b30b743238533d7ba75"
+
+[metadata.files]
+pyusb = [
+    {file = "pyusb-1.1.0.tar.gz", hash = "sha256:d69ed64bff0e2102da11b3f49567256867853b861178689671a163d30865c298"},
+]
+pyusbio = []

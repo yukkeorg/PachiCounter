@@ -1,8 +1,7 @@
-# coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
 import os
-from pcounter.util import calcLpsOnNorm, calcLpsOnChance
+from pachicounter.util import calcLpsOnNorm, calcLpsOnChance
 
 
 class PluginLoader(object):
@@ -50,16 +49,16 @@ class ICounter(object):
                 return bi
 
     def createCountData(self):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def on(self, bit, state, countdata):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def off(self, bit, state, countdata):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def build(self, cd):
-        raise NotImplemented()
+        raise NotImplementedError
 
 
 class UtilsMixin(object):
@@ -75,7 +74,7 @@ class UtilsMixin(object):
                     d[k]['text'] = d[k]['text'].format(*args, **kw)
 
     def rgb2int(self, r, g, b, a=0xff):
-            return (a << 24) + (r << 16) + (g << 8) + b
+        return (a << 24) + (r << 16) + (g << 8) + b
 
     def ordering(self, n):
         rem10 = n % 10
