@@ -1,8 +1,11 @@
 # vim: ts=4 sts=4 sw=4 et
 
+import importlib
+
+
 VALID_RECEIVERS = {
-    'dummy': ('pcounter.hardware.dummy', 'DummyReceiver'),
-    'usbio': ('pcounter.hardware.usbio', 'UsbIoReceiver'),
+    'dummy': ('pachicounter.hardware.dummy', 'DummyReceiver'),
+    'usbio': ('pachicounter.hardware.usbio', 'UsbIoReceiver'),
 }
 
 

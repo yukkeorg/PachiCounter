@@ -1,9 +1,9 @@
 # coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
-from pcounter.core import USBIO_BIT, CountData, json
-from pcounter.plugin import ICounter, UtilsMixin
-from pcounter.util import gen_bonusrate, bit_is_enable
+from pachicounter.core import USBIO_BIT, CountData, json
+from pachicounter.plugin import ICounter, UtilsMixin
+from pachicounter.util import gen_bonusrate, bit_is_enable
 
 
 class stealth(ICounter, UtilsMixin):

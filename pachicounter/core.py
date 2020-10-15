@@ -10,9 +10,9 @@ except ImportError:
     except ImportError:
         import json
 
-from pcounter.hwr import HwReceiver
-from pcounter.plugin import ICounter
-from pcounter.pctypes import enum
+from pachicounter.hardware import HwReceiver
+from pachicounter.plugin import ICounter
+from pachicounter.pctypes import enum
 
 
 logger = logging.getLogger("PachiCounter")

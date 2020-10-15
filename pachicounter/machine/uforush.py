@@ -3,10 +3,10 @@
 
 import time
 
-from pcounter.core import USBIO_BIT, CountData, json
-from pcounter.plugin import ICounter, UtilsMixin, BonusRound
-from pcounter.util import (gen_bonusrate, bit_is_enable,
-                           calcLpsOnNorm, calcLpsOnChance)
+from pachicounter.core import USBIO_BIT, CountData, json
+from pachicounter.plugin import ICounter, UtilsMixin, BonusRound
+from pachicounter.util import (gen_bonusrate, bit_is_enable,
+                               calcLpsOnNorm, calcLpsOnChance)
 
 
 class DeltaTime(object):
