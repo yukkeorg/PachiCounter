@@ -37,10 +37,10 @@ def makedir(target):
             raise
 
 
-class App(object):
+class App:
     def __init__(self, basedir, pollingInterval=None, resourcedir=None):
         pollingInterval = pollingInterval or 50  # msec
-        resourcedir = resourcedir or u"~/.pcounter.d"
+        resourcedir = resourcedir or "~/.pcounter.d"
 
         self.basedir = basedir
         self.pollingInterval = pollingInterval

@@ -109,7 +109,7 @@ class uforush(ICounter, UtilsMixin):
             if cd.chain > 1:
                 dd["4"]["text"] = "UFO RUSH ({pbr}R)"
 
-            #self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
+            # self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
             dd["0"]["color"] = self.rgb2int(0, 0, 0)
         else:
             dd = {
@@ -125,7 +125,7 @@ class uforush(ICounter, UtilsMixin):
         if cd.isbonus == 1:
             dd["framesvg0"] = "resource/orangeflame_wide.svg"
             dd["4"]["text"] = "BONUS TIME"
-            #self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
+            # self.bulk_set_color(dd, self.rgb2int(0xff, 0xff, 0x33))
             dd["0"]["color"] = self.rgb2int(0, 0, 0)
 
         self.bulk_format_text(dd, **(cd.getdict()))
