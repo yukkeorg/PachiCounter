@@ -1,6 +1,4 @@
-# coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
-
 
 def bit_is_enable(val, bit):
     return bool(val & (1 << bit))
@@ -22,7 +20,7 @@ def bulk_set_color(d, color):
 
 
 def rgb(r, g, b, a=0xff):
-        return (a << 24) + (r << 16) + (g << 8) + b
+    return (a << 24) + (r << 16) + (g << 8) + b
 
 
 def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):

@@ -1,26 +1,14 @@
-# coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
-import os
-from pcounter.util import calcLpsOnNorm, calcLpsOnChance
+import importlib
+from pachicounter.util import calcLpsOnNorm, calcLpsOnChance
 
 
-class PluginLoader(object):
-    def __init__(self, basedir, plugindir):
-        self._plugindir = plugindir
-        self._pluginnames = []
-        # ディレクトリ内のプラグインファイルを収集
-        fullplugindir = os.path.join(basedir, plugindir)
-        for fname in os.listdir(fullplugindir):
-            if fname.endswith(".py") and not fname.startswith("__init__"):
-                self._pluginnames.append(fname.replace(u".py", u""))
-
+class PluginLoader:
     def getClass(self, pluginname):
         """ 指定されたプラグインをインポートしてその型を返す """
-        if pluginname not in self._pluginnames:
-            raise NameError("{0} is not found.".format(pluginname))
-        imp = __import__(self._plugindir, {}, {}, [pluginname])
-        module = getattr(imp, pluginname)
+        modname = ".".join(("pachicounter", "machine", pluginname))
+        module = importlib.import_module(modname)
         return getattr(module, pluginname)
 
     def getInstance(self, pluginname, args=None):
@@ -31,14 +19,14 @@ class PluginLoader(object):
             return klass(args)
 
 
-class BonusRound(object):
+class BonusRound:
     def __init__(self, nround, limitsec, gainpts):
         self.nround = nround
         self.limitsec = limitsec
         self.gainpts = gainpts
 
 
-class ICounter(object):
+class ICounter:
     LPS = (calcLpsOnNorm(3, 20),         # losepts/sec
            calcLpsOnChance(0.90))
     MaxSPC = 40.0       # sec/count
@@ -50,16 +38,16 @@ class ICounter(object):
                 return bi
 
     def createCountData(self):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def on(self, bit, state, countdata):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def off(self, bit, state, countdata):
-        raise NotImplemented()
+        raise NotImplementedError
 
     def build(self, cd):
-        raise NotImplemented()
+        raise NotImplementedError
 
 
 class UtilsMixin(object):
@@ -75,7 +63,7 @@ class UtilsMixin(object):
                     d[k]['text'] = d[k]['text'].format(*args, **kw)
 
     def rgb2int(self, r, g, b, a=0xff):
-            return (a << 24) + (r << 16) + (g << 8) + b
+        return (a << 24) + (r << 16) + (g << 8) + b
 
     def ordering(self, n):
         rem10 = n % 10

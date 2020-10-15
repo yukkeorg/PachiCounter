@@ -1,9 +1,9 @@
 # coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
-from pcounter.core import json, CountData, USBIO_BIT
-from pcounter.plugin import ICounter, UtilsMixin
-from pcounter.util import (gen_bonusrate, bit_is_enable)
+from pachicounter.core import json, CountData, USBIO_BIT
+from pachicounter.plugin import ICounter, UtilsMixin
+from pachicounter.util import (gen_bonusrate, bit_is_enable)
 
 
 class vb(ICounter, UtilsMixin):

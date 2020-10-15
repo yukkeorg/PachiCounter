@@ -1,11 +1,8 @@
 # coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
 
-from pcounter.hwr.hwreceiver import HwReceiver, HwReceiverError
-try:
-    import pyusbio
-except ImportError:
-    from pcounter.hwr.pyusbio import pyusbio
+import pyusbio
+from . import HwReceiver, HwReceiverError
 
 
 class UsbIoReceiver(HwReceiver):
