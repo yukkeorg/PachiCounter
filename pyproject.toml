@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.6"
 pyusbio = {git = "https://github.com/yukkeorg/pyusbio.git"}
+"vext.gi" = "^0.7.4"
 
 [tool.poetry.dev-dependencies]
 
