@@ -19,14 +19,14 @@ class PluginLoader:
             return klass(args)
 
 
-class BonusRound(object):
+class BonusRound:
     def __init__(self, nround, limitsec, gainpts):
         self.nround = nround
         self.limitsec = limitsec
         self.gainpts = gainpts
 
 
-class ICounter(object):
+class ICounter:
     LPS = (calcLpsOnNorm(3, 20),         # losepts/sec
            calcLpsOnChance(0.90))
     MaxSPC = 40.0       # sec/count

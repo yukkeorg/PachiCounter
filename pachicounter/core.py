@@ -28,7 +28,7 @@ class PCounterError(Exception):
     pass
 
 
-class CountData(object):
+class CountData:
     def __init__(self, colnames=None, *argnames):
         if colnames is None:
             colnames = []
