@@ -1,5 +1,5 @@
-PC Counter for Pachinko
-=======================
+PachiCounter
+============
 
 Pachinko Counter は、パチンコ台の外部情報出力端子から出力される信号を、USB-IO経
 由で受け取り、現在の回転数や確率などを出力するいわゆるホールに設置されているデ
