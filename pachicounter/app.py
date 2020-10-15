@@ -72,7 +72,7 @@ class App(object):
             return 1
 
         # 引数で指定され機種に対応したモジュールをインポートする
-        loader = PluginLoader(self.basedir, "machine")
+        loader = PluginLoader()
         plugin = loader.getInstance(machine)
         cd = plugin.createCountData()
         if not opt.reset:

@@ -23,6 +23,7 @@ def hwReceiverFactory(name, *args, **kw):
         raise NameError("{0} receiver object is not found")
 
     modname, clsname = VALID_RECEIVERS[name]
-    module = __import__(modname, globals(), locals(), [clsname])
+    module = importlib.import_module(modname)
     klass = getattr(module, clsname)
+
     return klass(*args, **kw)

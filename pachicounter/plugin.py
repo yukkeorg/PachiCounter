@@ -1,25 +1,14 @@
 # vim: ts=4 sts=4 sw=4 et
 
-import os
+import importlib
 from pachicounter.util import calcLpsOnNorm, calcLpsOnChance
 
 
-class PluginLoader(object):
-    def __init__(self, basedir, plugindir):
-        self._plugindir = plugindir
-        self._pluginnames = []
-        # ディレクトリ内のプラグインファイルを収集
-        fullplugindir = os.path.join(basedir, plugindir)
-        for fname in os.listdir(fullplugindir):
-            if fname.endswith(".py") and not fname.startswith("__init__"):
-                self._pluginnames.append(fname.replace(u".py", u""))
-
+class PluginLoader:
     def getClass(self, pluginname):
         """ 指定されたプラグインをインポートしてその型を返す """
-        if pluginname not in self._pluginnames:
-            raise NameError("{0} is not found.".format(pluginname))
-        imp = __import__(self._plugindir, {}, {}, [pluginname])
-        module = getattr(imp, pluginname)
+        modname = ".".join(("pachicounter", "machine", pluginname))
+        module = importlib.import_module(modname)
         return getattr(module, pluginname)
 
     def getInstance(self, pluginname, args=None):
