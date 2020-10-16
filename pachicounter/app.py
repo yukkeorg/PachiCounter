@@ -11,7 +11,7 @@ For details, please see LICENSE file.
 import os
 import sys
 import signal
-import optparse
+import argparse
 
 from gi.repository import GLib
 
@@ -29,27 +29,23 @@ logger.addHandler(logging.StreamHandler())
 
 class App:
     def __init__(self, basedir, pollingInterval=None, resourcedir=None):
-        pollingInterval = pollingInterval or 50  # msec
-        resourcedir = resourcedir or "~/.pcounter.d"
+        if pollingInterval is None:
+            pollingInterval = 50  # msec
+
+        if resourcedir is None:
+            resourcedir = "~/.pcounter.d"
 
         self.basedir = basedir
-        self.pollingInterval = pollingInterval
+        self.pollingInterval = pollingInterval / 1000
         self.resourcedir = os.path.expanduser(resourcedir)
 
     def main(self, args=None):
-        # コマンドラインオプションをパース
-        if args is None:
-            args = sys.argv[1:]
+        parser = argparse.ArgumentParser()
+        parser.add_argument("-r", "--reset", dest="reset", action="store_true")
+        parser.add_argument("machine")
+        args = parser.parse_args(args)
 
-        parser = optparse.OptionParser()
-        parser.add_option("-r", "--reset", dest="reset", action="store_true")
-        opt, args = parser.parse_args(args)
-
-        if len(args) == 0:
-            logger.critical("カウント対象機種を指定されていません。")
-            return 1
-
-        machine = args[0]
+        machine = args.machine
 
         # 設定ファイル保存ディレクトリとファイルのパスを生成
         os.makedirs(self.resourcedir, exist_ok=True)
@@ -65,9 +61,10 @@ class App:
         # 引数で指定され機種に対応したモジュールをインポートする
         loader = PluginLoader()
         plugin = loader.getInstance(machine)
-        cd = plugin.createCountData()
-        if not opt.reset:
-            cd.load(datafilepath)
+
+        counter_data = plugin.createCountData()
+        if not args.reset:
+            counter_data.load(datafilepath)
 
         # PCounterオブジェクト作成
         pc = PCounter(hw, plugin, cd)
