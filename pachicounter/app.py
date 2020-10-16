@@ -13,7 +13,7 @@ import sys
 import signal
 import argparse
 
-from gi.repository import GLib
+import gevent
 
 from pachicounter.core import PCounter
 from pachicounter.hardware import hwReceiverFactory, HwReceiverError
@@ -67,28 +67,27 @@ class App:
             counter_data.load(datafilepath)
 
         # PCounterオブジェクト作成
-        pc = PCounter(hw, plugin, cd)
+        pc = PCounter(hw, plugin, counter_data)
 
         # メインループオブジェクト作成
-        loop = GLib.MainLoop()
+        def loop():
+            while True:
+                gevent.sleep(self.pollingInterval)
+                pc.loop()
+
+        greenlet = gevent.spawn(loop)
 
         # シグナルハンドラ設定
         if sys.platform != "win32":
-            def signal_handler(user_data):
-                loop.quit()
-            GLib.unix_signal_add(GLib.PRIORITY_DEFAULT,
-                                 signal.SIGTERM,
-                                 signal_handler,
-                                 None)
-
-        GLib.timeout_add(self.pollingInterval, pc.loop)
+            gevent.signal_handler(signal.SIGTERM, lambda: greenlet.kill())
 
         # メインループ
         try:
-            loop.run()
+            greenlet.join()
         except KeyboardInterrupt:
             pass
         finally:
-            cd.save(datafilepath)
-            logger.info("Counter data is saved to {}".format(datafilepath))
+            counter_data.save(datafilepath)
+            logger.info("Counter data saved to {}".format(datafilepath))
+
         return 0
