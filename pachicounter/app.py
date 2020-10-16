@@ -22,9 +22,6 @@ from pachicounter.plugin import PluginLoader
 import logging
 logger = logging.getLogger("PCounter")
 logger.setLevel(logging.INFO)
-logger.addHandler(logging.StreamHandler())
-
-
 
 
 class App:
