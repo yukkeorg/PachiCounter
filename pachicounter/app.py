@@ -11,7 +11,6 @@ For details, please see LICENSE file.
 import os
 import sys
 import signal
-import errno
 import optparse
 
 from gi.repository import GLib
@@ -26,15 +25,6 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
-def makedir(target):
-    """ リソースディレクトリを作成する """
-    try:
-        os.makedirs(target)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            pass
-        else:
-            raise
 
 
 class App:
@@ -62,8 +52,9 @@ class App:
         machine = args[0]
 
         # 設定ファイル保存ディレクトリとファイルのパスを生成
-        makedir(self.resourcedir)
+        os.makedirs(self.resourcedir, exist_ok=True)
         datafilepath = os.path.join(self.resourcedir, machine)
+
         # ハードウエアレシーバオブジェクト作成
         try:
             hw = hwReceiverFactory("usbio")
