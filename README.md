@@ -18,9 +18,8 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 -----------------
 
 - Python 3.6 or later
-- PyGObject
-- PyUSB and libusb-1.0
-- SimpleJSON
+- libuv
+- libusb-1.0
 - PyUSBIO
   - https://github.com/yukkeorg/pyusbio
 
@@ -30,7 +29,7 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
     $ git clone https://github.com/yukkeorg/PachiCounter.git
     $ cd PachiCounter
-    $ python pcounter/app.py [option] [machine_name]
+    $ poetry run pachicounter uforush
 
 
 オプション
