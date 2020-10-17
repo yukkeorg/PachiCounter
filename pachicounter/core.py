@@ -69,15 +69,20 @@ class CountData:
             s = json.dumps(self.__dict__['counts'])
             fp.write(s.encode('utf-8'))
 
-    def load(self, filename):
-        with open(filename, 'rb') as fp:
-            try:
-                data = json.load(fp)
-            except Exception:
-                return
-        for k in data:
-            if k in self.__dict__['counts']:
-                self.__dict__['counts'][k] = data[k]
+    def load(self, filename, raise_ok=False):
+        try:
+            with open(filename, 'rb') as fp:
+                try:
+                    data = json.load(fp)
+                except Exception:
+                    return
+            for k in data:
+                if k in self.__dict__['counts']:
+                    self.__dict__['counts'][k] = data[k]
+        except FileNotFoundError:
+            if raise_ok:
+                raise
+            pass
 
 
 class PCounter(object):
