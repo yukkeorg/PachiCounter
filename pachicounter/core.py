@@ -1,6 +1,7 @@
 # vim: ts=4 sts=4 sw=4 et
 
 import sys
+import enum
 import logging
 try:
     import ujson as json
@@ -12,16 +13,21 @@ except ImportError:
 
 from pachicounter.hardware import HwReceiver
 from pachicounter.plugin import ICounter
-from pachicounter.pctypes import enum
 
 
 logger = logging.getLogger("PachiCounter")
 
-USBIO_BIT = enum('COUNT', 'BONUS', 'CHANCE', 'SBONUS', 'LAST')
+
+class USBIO_BIT(enum.IntEnum):
+    COUNT = 0
+    BONUS = 1
+    CHANCE = 2
+    SBONUS = 3
+    LAST = 4
+
+
 N_BITS = USBIO_BIT.LAST
 BITMASK = (1 << USBIO_BIT.LAST) - 1
-if sys.version_info[0] >= 3:
-    unicode = str
 
 
 class PCounterError(Exception):
@@ -32,7 +38,7 @@ class CountData:
     def __init__(self, colnames=None, *argnames):
         if colnames is None:
             colnames = []
-        elif isinstance(colnames, (str, unicode)):
+        elif isinstance(colnames, str):
             colnames = [colnames]
         else:
             colnames = list(colnames)
