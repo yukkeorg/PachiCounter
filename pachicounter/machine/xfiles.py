@@ -1,12 +1,16 @@
-# coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
+
+import enum
 
 from pachicounter.core import json, CountData, USBIO_BIT
 from pachicounter.plugin import ICounter, UtilsMixin
-from pachicounter.pctypes import enum
 from pachicounter.util import (gen_bonusrate, bit_is_enable)
 
-STATE = enum('NORMAL', 'UFOZONE', 'XTRARUSH')
+
+class STATE(enum.IntEnum):
+    NORMAL = 0
+    UFOZONE = 1
+    XTRARUSH = 2
 
 
 class xfiles(ICounter, UtilsMixin):
@@ -28,7 +32,7 @@ class xfiles(ICounter, UtilsMixin):
                 # つかないため、UFO-ZONE状態中に5回転以上回ったら、直撃の
                 # XTRA-RUSHだったと判定する。
                 if self.state == STATE.UFOZONE and cd.count > 5:
-                    self.state = STATE.EXTRARUSH
+                    self.state = STATE.XTRARUSH
                     cd.xr += 1
             else:
                 cd.normalgames += 1
