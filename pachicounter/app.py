@@ -1,6 +1,4 @@
-# coding: utf-8
 # vim: ts=4 sts=4 sw=4 et
-
 """\
 Pachi Counter
 Copyright (c) 2011-2020, Yusuke Ohshima All rights reserved.
@@ -19,9 +17,16 @@ from pachicounter.core import PCounter
 from pachicounter.hardware import hwReceiverFactory, HwReceiverError
 from pachicounter.plugin import PluginLoader
 
-import logging
-logger = logging.getLogger("PCounter")
-logger.setLevel(logging.INFO)
+
+def _setup_logger():
+    import logging
+    logger = logging.getLogger("PCounter")
+    loglevel = os.environ.get("PACHICOUNTER_LOGLEVEL")
+    if loglevel is not None:
+        logger.setLevel(loglevel)
+    return logger
+
+logger = _setup_logger()
 
 
 class App:
@@ -30,7 +35,7 @@ class App:
             pollingInterval = 50  # msec
 
         if resourcedir is None:
-            resourcedir = "~/.pcounter.d"
+            resourcedir = "~/.config/pcounter.d"
 
         self.basedir = basedir
         self.pollingInterval = pollingInterval / 1000
@@ -67,12 +72,12 @@ class App:
         pc = PCounter(hw, plugin, counter_data)
 
         # メインループオブジェクト作成
-        def loop():
+        def mainloop():
             while True:
                 gevent.sleep(self.pollingInterval)
                 pc.loop()
 
-        greenlet = gevent.spawn(loop)
+        greenlet = gevent.spawn(mainloop)
 
         # シグナルハンドラ設定
         if sys.platform != "win32":
