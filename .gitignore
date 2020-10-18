@@ -24,3 +24,6 @@ pip-log.txt
 
 #Translations
 *.mo
+
+.vscode
+.mypy_cache
