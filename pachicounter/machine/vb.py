@@ -1,40 +1,48 @@
 # vim: ts=4 sts=4 sw=4 et
 
-from pachicounter.core import json, CountData, USBIO_BIT
+from pachicounter.core import json, CountData, SIGNAL_BIT
 from pachicounter.plugin import ICounter, UtilsMixin
 from pachicounter.util import (gen_bonusrate, bit_is_enable)
 
 
 class vb(ICounter, UtilsMixin):
+    # 転落率
     FALLDOWN_POSSIBILITY = 1/338.5
 
     def __init__(self):
         self.bonus_history = []
 
     def createCountData(self):
-        return CountData(("count", "totalcount", "chancegames",
-                          "normalgames", "bonus", "chain", "chance"))
+        return CountData(
+            "count",
+            "totalcount",
+            "chancegames",
+            "normalgames",
+            "bonus",
+            "chain",
+            "chance",
+        )
 
     def on(self, cbittype, bitgroup, cd):
-        if cbittype == USBIO_BIT.COUNT:
+        if cbittype == SIGNAL_BIT.COUNT:
             cd["count"] += 1
             cd["totalcount"] += 1
-            if bit_is_enable(bitgroup, USBIO_BIT.CHANCE):
+            if bit_is_enable(bitgroup, SIGNAL_BIT.CHANCE):
                 cd["chancegames"] += 1
             else:
                 cd["normalgames"] += 1
-        elif cbittype == USBIO_BIT.BONUS:
+        elif cbittype == SIGNAL_BIT.BONUS:
             cd["bonus"] += 1
-            if bit_is_enable(bitgroup, USBIO_BIT.CHANCE):
+            if bit_is_enable(bitgroup, SIGNAL_BIT.CHANCE):
                 cd["chain"] += 1
                 self.bonus_history.insert(0, (cd["chain"], cd["count"]))
-        elif cbittype == USBIO_BIT.CHANCE:
+        elif cbittype == SIGNAL_BIT.CHANCE:
             cd["chance"] += 1
 
     def off(self, cbittype, bitgroup, cd):
-        if cbittype == USBIO_BIT.BONUS:
+        if cbittype == SIGNAL_BIT.BONUS:
             cd["count"] = 0
-        if cbittype == USBIO_BIT.CHANCE:
+        if cbittype == SIGNAL_BIT.CHANCE:
             cd["count"] = 0
             cd["chain"] = 0
             cd["chancegames"] = 0

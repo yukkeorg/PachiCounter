@@ -2,7 +2,7 @@
 
 import enum
 
-from pachicounter.core import json, CountData, USBIO_BIT
+from pachicounter.core import json, CountData, SIGNAL_BIT
 from pachicounter.plugin import ICounter, UtilsMixin
 from pachicounter.util import (gen_bonusrate, bit_is_enable)
 
@@ -18,15 +18,23 @@ class xfiles(ICounter, UtilsMixin):
         self.state = STATE.NORMAL
 
     def createCountData(self):
-        return CountData('count', 'totalcount', 'chancegames',
-                         'normalgames', 'bonus', 'sbonus',
-                         'xr', 'chain', 'chance')
+        return CountData(
+            'count',
+            'totalcount',
+            'chancegames',
+            'normalgames',
+            'bonus',
+            'sbonus',
+            'xr',
+            'chain',
+            'chance'
+        )
 
     def on(self, cbittype, bitgroup, cd):
-        if cbittype == USBIO_BIT.COUNT:
+        if cbittype == SIGNAL_BIT.COUNT:
             cd.count += 1
             cd.totalcount += 1
-            if bit_is_enable(bitgroup, USBIO_BIT.CHANCE):
+            if bit_is_enable(bitgroup, SIGNAL_BIT.CHANCE):
                 cd.chancegames += 1
                 # 直撃のEXTRA-RUSHは、最初の5回転のみではUFO-ZONEと見分けが
                 # つかないため、UFO-ZONE状態中に5回転以上回ったら、直撃の
@@ -36,24 +44,24 @@ class xfiles(ICounter, UtilsMixin):
                     cd.xr += 1
             else:
                 cd.normalgames += 1
-        if cbittype == USBIO_BIT.BONUS:
+        if cbittype == SIGNAL_BIT.BONUS:
             cd.bonus += 1
-            if bit_is_enable(bitgroup, USBIO_BIT.CHANCE):
+            if bit_is_enable(bitgroup, SIGNAL_BIT.CHANCE):
                 cd.chain += 1
                 if self.state == STATE.NORMAL:
                     self.state = STATE.UFOZONE
                 elif self.state == STATE.UFOZONE:
                     self.state = STATE.XTRARUSH
                     cd.xr += 1
-        if cbittype == USBIO_BIT.CHANCE:
+        if cbittype == SIGNAL_BIT.CHANCE:
             cd.chance += 1
-        if cbittype == USBIO_BIT.SBONUS:
+        if cbittype == SIGNAL_BIT.SBONUS:
             cd.sbonus += 1
 
     def off(self, cbittype, bitgroup, cd):
-        if cbittype == USBIO_BIT.BONUS:
+        if cbittype == SIGNAL_BIT.BONUS:
             cd.count = 0
-        if cbittype == USBIO_BIT.CHANCE:
+        if cbittype == SIGNAL_BIT.CHANCE:
             self.state = STATE.NORMAL
             cd.chain = 0
 

@@ -2,7 +2,7 @@
 
 import time
 
-from pachicounter.core import USBIO_BIT, CountData, json
+from pachicounter.core import SIGNAL_BIT, CountData, json
 from pachicounter.plugin import ICounter, UtilsMixin, BonusRound
 from pachicounter.util import (gen_bonusrate, bit_is_enable,
                                calcLpsOnNorm, calcLpsOnChance)
@@ -45,15 +45,24 @@ class uforush(ICounter, UtilsMixin):
         self.bonustime = DeltaTime()
 
     def createCountData(self):
-        return CountData("count", "totalcount", "bonus",
-                         "chance", "chain", "chancetime",
-                         "isbonus", "sbonus", "spg", "spb",
-                         "pbr", "voutput")
+        return CountData(
+            "count",        # 現在のゲーム数
+            "totalcount",   # 総ゲーム数
+            "bonus",        # 大当たり回数
+            "chance",       # 確変
+            "chain",        # 連荘数
+            "chancetime",   # チャンスタイム
+            "isbonus",      # ホーナス中か？
+            "spg",          #
+            "spb",          #
+            "pbr",          #
+            "voutput"       #
+        )
 
     def on(self, cbtype, iostatus, cd):
-        ischance = bit_is_enable(iostatus, USBIO_BIT.CHANCE)
+        ischance = bit_is_enable(iostatus, SIGNAL_BIT.CHANCE)
 
-        if cbtype == USBIO_BIT.COUNT:
+        if cbtype == SIGNAL_BIT.COUNT:
             cd.count += 1
             if not ischance:
                 cd.totalcount += 1
@@ -63,19 +72,19 @@ class uforush(ICounter, UtilsMixin):
             cd.spg = d
             cd.voutput += (min(self.MaxSPC, d) * lps)
 
-        elif cbtype == USBIO_BIT.BONUS:
+        elif cbtype == SIGNAL_BIT.BONUS:
             self.bonustime.check()
             cd.bonus += 1
             cd.isbonus = 1
             if ischance:
                 cd.chain += 1
 
-        elif cbtype == USBIO_BIT.CHANCE:
+        elif cbtype == SIGNAL_BIT.CHANCE:
             cd.chance += 1
 
     def off(self, cbtype, iostatus, cd):
-        ischance = bit_is_enable(iostatus, USBIO_BIT.CHANCE)
-        if cbtype == USBIO_BIT.BONUS:
+        ischance = bit_is_enable(iostatus, SIGNAL_BIT.CHANCE)
+        if cbtype == SIGNAL_BIT.BONUS:
             cd.isbonus = 0
             cd.count = 0
             if ischance:
@@ -88,7 +97,7 @@ class uforush(ICounter, UtilsMixin):
             cd.pbr = bi.nround
             cd.voutput += bi.gainpts
 
-        elif cbtype == USBIO_BIT.CHANCE:
+        elif cbtype == SIGNAL_BIT.CHANCE:
             cd.chain = 0
             cd.chancetime = 0
             cd.totalcount += cd.count

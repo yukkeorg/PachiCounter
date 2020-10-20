@@ -1,6 +1,6 @@
 # vim: ts=4 sts=4 sw=4 et
 
-from pachicounter.core import USBIO_BIT, CountData, json
+from pachicounter.core import SIGNAL_BIT, CountData, json
 from pachicounter.plugin import ICounter, UtilsMixin
 from pachicounter.util import gen_bonusrate, bit_is_enable
 
@@ -9,32 +9,39 @@ class ghostneo(ICounter, UtilsMixin):
     MAX_CHANCE_TIME = 100
 
     def createCountData(self):
-        return CountData(('count', 'totalcount', 'bonus',
-                          'chance', 'chain', 'chancetime', 'isbonus',
-                          'sbonus'))
+        return CountData(
+            'count',
+            'totalcount',
+            'bonus',
+            'chance',
+            'chain',
+            'chancetime',
+            'isbonus',
+            'sbonus',
+        )
 
     def on(self, cbtype, iostatus, cd):
-        if cbtype == USBIO_BIT.COUNT:
+        if cbtype == SIGNAL_BIT.COUNT:
             cd['count'] += 1
-            if not bit_is_enable(iostatus, USBIO_BIT.CHANCE):
+            if not bit_is_enable(iostatus, SIGNAL_BIT.CHANCE):
                 cd['totalcount'] += 1
-        elif cbtype == USBIO_BIT.BONUS:
+        elif cbtype == SIGNAL_BIT.BONUS:
             cd['bonus'] += 1
             cd['isbonus'] = 1
-            if bit_is_enable(iostatus, USBIO_BIT.CHANCE):
+            if bit_is_enable(iostatus, SIGNAL_BIT.CHANCE):
                 cd['chain'] += 1
-        elif cbtype == USBIO_BIT.CHANCE:
+        elif cbtype == SIGNAL_BIT.CHANCE:
             cd['chance'] += 1
-        elif cbtype == USBIO_BIT.SBONUS:
+        elif cbtype == SIGNAL_BIT.SBONUS:
             cd['sbonus'] += 1
 
     def off(self, cbtype, iostatus, cd):
-        if cbtype == USBIO_BIT.BONUS:
+        if cbtype == SIGNAL_BIT.BONUS:
             cd['isbonus'] = 0
             cd['count'] = 0
-            if bit_is_enable(iostatus, USBIO_BIT.CHANCE):
+            if bit_is_enable(iostatus, SIGNAL_BIT.CHANCE):
                 cd['chancetime'] = 1
-        elif cbtype == USBIO_BIT.CHANCE:
+        elif cbtype == SIGNAL_BIT.CHANCE:
             cd['chain'] = 0
             cd['chancetime'] = 0
             if cd['count'] >= self.MAX_CHANCE_TIME:
