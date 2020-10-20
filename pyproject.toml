@@ -14,7 +14,7 @@ gevent = "^20.9.0"
 
 
 [tool.poetry.scripts]
-pachicounter = "pachicounter.cli:main"
+pachicounter = "pachicounter.app:main"
 
 
 [build-system]

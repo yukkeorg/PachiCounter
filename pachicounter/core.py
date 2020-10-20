@@ -10,7 +10,6 @@ except ImportError:
         import simplejson as json
     except ImportError:
         import json
-
 from pachicounter.hardware import HwReceiver
 from pachicounter.plugin import ICounter
 
@@ -18,7 +17,7 @@ from pachicounter.plugin import ICounter
 logger = logging.getLogger("PachiCounter")
 
 
-class USBIO_BIT(enum.IntEnum):
+class SIGNAL_BIT(enum.IntEnum):
     COUNT = 0
     BONUS = 1
     CHANCE = 2
@@ -26,8 +25,8 @@ class USBIO_BIT(enum.IntEnum):
     LAST = 4
 
 
-N_BITS = USBIO_BIT.LAST
-BITMASK = (1 << USBIO_BIT.LAST) - 1
+N_BITS = SIGNAL_BIT.LAST
+BITMASK = (1 << SIGNAL_BIT.LAST) - 1
 
 
 class PCounterError(Exception):
@@ -35,15 +34,14 @@ class PCounterError(Exception):
 
 
 class CountData:
-    def __init__(self, colnames=None, *argnames):
+    def __init__(self, *args, colnames=None):
         if colnames is None:
             colnames = []
         elif isinstance(colnames, str):
             colnames = [colnames]
         else:
             colnames = list(colnames)
-        colnames += argnames
-
+        colnames += args
         self.__dict__['counts'] = dict.fromkeys(colnames, 0)
 
     def __getitem__(self, key):
@@ -86,13 +84,13 @@ class CountData:
 
 
 class PCounter(object):
-    def __init__(self, hr, cif, countdata, eol=None, output=None):
-        if not isinstance(hr, HwReceiver):
-            raise TypeError(u"hr は HwReceiver のインスタンスではありません。")
+    def __init__(self, hardware, cif, countdata, eol=None, output=None):
+        if not isinstance(hardware, HwReceiver):
+            raise TypeError(u"hardware は HwReceiver のインスタンスではありません。")
         if not isinstance(cif, ICounter):
             raise TypeError(u"cif は ICounter のインスタンスではありません。")
 
-        self.hr = hr
+        self.hardware = hardware
         self.cif = cif
         self.eol = '\0' if eol is None else eol
         self.output = output or sys.stdout
@@ -102,8 +100,10 @@ class PCounter(object):
         self.__prevportval = -1
 
     def countup(self, portval):
-        for bit in (USBIO_BIT.COUNT, USBIO_BIT.BONUS,
-                    USBIO_BIT.CHANCE, USBIO_BIT.SBONUS):
+        for bit in (SIGNAL_BIT.COUNT,
+                    SIGNAL_BIT.BONUS,
+                    SIGNAL_BIT.CHANCE,
+                    SIGNAL_BIT.SBONUS):
             checkbit = 1 << bit
             edgeup = bool(portval & checkbit)
             state = bool(self.__switch & checkbit)
@@ -125,7 +125,7 @@ class PCounter(object):
             self.output.flush()
 
     def loop(self):
-        portval = self.hr.get_port_value()
+        portval = self.hardware.get_port_value()
         if portval != self.__prevportval:
             self.__prevportval = portval
             self.countup(portval)
