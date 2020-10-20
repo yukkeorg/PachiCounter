@@ -12,6 +12,10 @@ class vb(ICounter, UtilsMixin):
     def __init__(self):
         self.bonus_history = []
 
+    @property
+    def machine_name(self):
+        return "CR VirusBreaker (c) 2012 JB"
+
     def createCountData(self):
         return CountData(
             "count",

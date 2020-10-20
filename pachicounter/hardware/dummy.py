@@ -9,3 +9,7 @@ class DummyReceiver(HwReceiver):
 
     def get_port_value(self):
         return 0xff
+
+    @property
+    def receiver_name(self):
+        return "Dummy"

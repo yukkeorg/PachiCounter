@@ -6,6 +6,10 @@ from pachicounter.util import gen_bonusrate, bit_is_enable
 
 
 class stealth(ICounter, UtilsMixin):
+    @property
+    def machine_name(self):
+        return "CR Stealth (c) 2010 JB"
+
     def createCountData(self):
         return CountData('count', 'totalcount', 'bonus',
                          'chance', 'chain', 'chancetime', 'isbonus',

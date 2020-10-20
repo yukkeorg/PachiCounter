@@ -8,6 +8,10 @@ from pachicounter.util import gen_bonusrate, bit_is_enable
 class ghostneo(ICounter, UtilsMixin):
     MAX_CHANCE_TIME = 100
 
+    @property
+    def machine_name(self):
+        return "CR GhostNeo (c) 2013 JB"
+
     def createCountData(self):
         return CountData(
             'count',

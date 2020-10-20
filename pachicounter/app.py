@@ -60,12 +60,6 @@ class App:
         parser.add_argument("machine")
         args = parser.parse_args(args)
 
-        machine = args.machine
-
-        # 設定ファイル保存ディレクトリとファイルのパスを生成
-        os.makedirs(self.resourcedir, exist_ok=True)
-        datafilepath = os.path.join(self.resourcedir, machine)
-        logger.info("Datafile: " + datafilepath)
 
         # ハードウエアレシーバオブジェクト作成
         try:
@@ -76,8 +70,15 @@ class App:
         logger.info("Hardware: " + hardware.receiver_name)
 
         # 引数で指定され機種に対応したモジュールをインポートする
+        machine = args.machine
         loader = PluginLoader()
         machine_plugin = loader.getInstance(machine)
+        logger.info("Machine: " + machine_plugin.machine_name)
+
+        # 設定ファイル保存ディレクトリとファイルのパスを生成
+        os.makedirs(self.resourcedir, exist_ok=True)
+        datafilepath = os.path.join(self.resourcedir, machine)
+        logger.info("Datafile: " + datafilepath)
 
         counter_data = machine_plugin.createCountData()
         if not args.reset:

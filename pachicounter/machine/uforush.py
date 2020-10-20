@@ -44,6 +44,10 @@ class uforush(ICounter, UtilsMixin):
         self.gcdelta = DeltaTime()
         self.bonustime = DeltaTime()
 
+    @property
+    def machine_name(self):
+        return "CR UFORush (c) 2013 Okumura"
+
     def createCountData(self):
         return CountData(
             "count",        # 現在のゲーム数

@@ -17,6 +17,10 @@ class xfiles(ICounter, UtilsMixin):
     def __init__(self):
         self.state = STATE.NORMAL
 
+    @property
+    def machine_name(self):
+        return "CR X-FILES (c) 2011 Sankyo"
+
     def createCountData(self):
         return CountData(
             'count',

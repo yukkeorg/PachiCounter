@@ -1,4 +1,12 @@
 # vim: ts=4 sts=4 sw=4 et
+#####################################################################
+# Pachi Counter
+# Copyright (c) 2011-2020, Yusuke Ohshima All rights reserved.
+#
+# License: MIT.
+# For details, please see LICENSE file.
+#####################################################################
+
 
 def bit_is_enable(val, bit):
     return bool(val & (1 << bit))
