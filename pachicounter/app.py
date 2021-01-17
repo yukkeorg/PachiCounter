@@ -60,7 +60,6 @@ class App:
         parser.add_argument("machine")
         args = parser.parse_args(args)
 
-
         # ハードウエアレシーバオブジェクト作成
         try:
             hardware = hwReceiverFactory("usbio")

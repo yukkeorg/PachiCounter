@@ -10,6 +10,7 @@
 import sys
 import enum
 import logging
+
 try:
     import ujson as json
 except ImportError:
@@ -17,6 +18,7 @@ except ImportError:
         import simplejson as json
     except ImportError:
         import json
+
 from pachicounter.hardware import HwReceiver
 from pachicounter.plugin import ICounter
 
