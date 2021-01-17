@@ -27,3 +27,5 @@ pip-log.txt
 
 .vscode
 .mypy_cache
+
+.env
