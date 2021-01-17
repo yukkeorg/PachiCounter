@@ -4,7 +4,7 @@ import enum
 
 from pachicounter.core import json, CountData, SIGNAL_BIT
 from pachicounter.plugin import ICounter, UtilsMixin
-from pachicounter.util import (gen_bonusrate, bit_is_enable)
+from pachicounter.util import bonusrate, bit_is_enable
 
 
 class STATE(enum.IntEnum):
@@ -71,7 +71,7 @@ class xfiles(ICounter, UtilsMixin):
 
     def build(self, cd):
         dd = {
-            '1': {'text': gen_bonusrate(cd.totalcount, cd.sbonus)},
+            '1': {'text': bonusrate(cd.totalcount, cd.sbonus)},
             '2': {'text': '{sbonus} / {chance} / {xr}'},
         }
         color = self.rgb2int(0xff, 0xff, 0xff)
