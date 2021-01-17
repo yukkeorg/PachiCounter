@@ -8,6 +8,8 @@
 #####################################################################
 
 import importlib
+from typing import Tuple
+
 from pachicounter.util import calcLpsOnNorm, calcLpsOnChance
 
 
@@ -27,22 +29,27 @@ class PluginLoader:
 
 
 class BonusRound:
-    def __init__(self, nround, limitsec, gainpts):
-        self.nround = nround
-        self.limitsec = limitsec
-        self.gainpts = gainpts
+    def __init__(self, nround: int, limitsec: float, gainpts: int):
+        self.nround: int = nround
+        self.limitsec: float = limitsec
+        self.gainpts: int = gainpts
 
 
-class ICounter:
-    LPS = (calcLpsOnNorm(3, 20),         # losepts/sec
-           calcLpsOnChance(0.90))
-    MaxSPC = 40.0       # sec/count
-    BonusRoundList = ()
+class BonusDetectorBase:
+    BonusRoundList: Tuple[BonusRound] = ()
 
-    def detectBonus(self, t):
+    def detectBonus(self, t: float):
         for bi in self.BonusRoundList:
             if t < bi.limitsec:
                 return bi
+
+
+class ICounter:
+    LPS = (
+        calcLpsOnNorm(3, 20),         # losepts/sec
+        calcLpsOnChance(0.90),
+    )
+    MaxSPC: float = 40.0       # sec/count
 
     def createCountData(self):
         raise NotImplementedError
