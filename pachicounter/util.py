@@ -50,19 +50,16 @@ def decolate_number(num, min_disp_digit, num_color=None, zero_color=None):
     return ''.join((zero_fmt, num_fmt))
 
 
-def gen_bonusrate(total, now, numesize=None, ndec=1):
-    numesize = numesize or "small"
+def bonusrate(total, now, ndec=1):
     nd = 10 ** ndec
     try:
         p = int((float(total) / now) * nd)
         d = p // nd
         f = p % nd
-        ratestr = ('<span size="{{2}}">'
-                   '1/</span>{{0}}<small>.{{1:0{}}}</small>'.format(ndec))
-        bonus_rate = ratestr.format(d, f, numesize)
+        ratestr = '1/{{0}}.{{1:0{}}}'.format(ndec)
+        bonus_rate = ratestr.format(d, f)
     except ZeroDivisionError:
-        bonus_rate = ('<span size="{0}">1/</span>-.<small>{1}</small>'
-                      .format(numesize, "-"*ndec))
+        bonus_rate = '1/-.{0}'.format("-"*ndec)
     return bonus_rate
 
 
@@ -71,8 +68,7 @@ def gen_chain(n_chain, suffix=None):
     chain = ""
     if n_chain > 0:
         chain = ('\n<span size="xx-large">{0}</span>{1}'
-                 .format(decolate_number(n_chain, 3),
-                         suffix))
+                 .format(decolate_number(n_chain, 3), suffix))
     return chain
 
 

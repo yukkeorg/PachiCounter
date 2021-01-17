@@ -2,7 +2,7 @@
 
 from pachicounter.core import json, CountData, SIGNAL_BIT
 from pachicounter.plugin import ICounter, UtilsMixin
-from pachicounter.util import (gen_bonusrate, bit_is_enable)
+from pachicounter.util import bonusrate, bit_is_enable
 
 
 class vb(ICounter, UtilsMixin):
@@ -54,7 +54,7 @@ class vb(ICounter, UtilsMixin):
 
     def build(self, cd):
         if cd["chain"] > 0:
-            bonus_rate = gen_bonusrate(cd["chancegames"], cd["chain"])
+            bonus_rate = bonusrate(cd["chancegames"], cd["chain"])
             # vat = self.ordering(cd["chance"])
             # continue_possibilty = ((1.0 - FALLDOWN_POSSIBILITY)
             #                         ** cd["chancegames"]) * 100
@@ -77,7 +77,7 @@ class vb(ICounter, UtilsMixin):
             dd["0"]["color"] = self.rgb2int(0, 0, 0)
         else:
             color = self.rgb2int(0xff, 0xff, 0xff)
-            bonus_rate = gen_bonusrate(cd["normalgames"], cd["chance"])
+            bonus_rate = bonusrate(cd["normalgames"], cd["chance"])
             dd = {
                 "framesvg0": "resource/blueflame_wide_vb.svg",
                 "0": {"text": "{count}<small> / {normalgames}</small>"},
