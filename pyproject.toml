@@ -9,6 +9,8 @@ license = "MIT"
 python = "^3.6"
 pyusbio = {git = "https://github.com/yukkeorg/pyusbio.git"}
 gevent = "^20.9.0"
+ujson = "^4.0.1"
+orjson = "^3.6.0"
 
 [tool.poetry.dev-dependencies]
 
