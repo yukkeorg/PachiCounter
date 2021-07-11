@@ -11,17 +11,9 @@ import sys
 import enum
 import logging
 
-try:
-    import ujson as json
-except ImportError:
-    try:
-        import simplejson as json
-    except ImportError:
-        import json
-
 from pachicounter.hardware import HwReceiver
 from pachicounter.plugin import ICounter
-
+from pachicounter.json import json
 
 logger = logging.getLogger("PachiCounter")
 
@@ -92,7 +84,7 @@ class CountData:
             pass
 
 
-class PCounter(object):
+class PCounter:
     def __init__(self, hardware, cif, countdata, eol=None, output=None):
         if not isinstance(hardware, HwReceiver):
             raise TypeError(u"hardware は HwReceiver のインスタンスではありません。")
