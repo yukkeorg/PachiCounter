@@ -17,8 +17,9 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 必要なソフトウエア
 -----------------
 
-- Python 3.6 or later
-- libuv
+- Python 3.11 or later
+- uv
+  - https://docs.astral.sh/uv/
 - libusb-1.0
 - PyUSBIO
   - https://github.com/yukkeorg/pyusbio
@@ -29,7 +30,8 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
     $ git clone https://github.com/yukkeorg/PachiCounter.git
     $ cd PachiCounter
-    $ poetry run pachicounter uforush
+    $ uv sync
+    $ uv run pachicounter uforush
 
 
 オプション
@@ -37,13 +39,6 @@ Pachinko Counter は、パチンコ台の外部情報出力端子から出力さ
 
 -r
 : カウンタをリセットした状態で起動します。
-
-
-制限
-----
-
-- イベントループでGLibを利用しているため、GLibがインストールされている環境での
-  み動作します。(これは近く改善する予定)
 
 
 ライセンス
