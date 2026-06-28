@@ -2,7 +2,7 @@
 
 from pachicounter.core import SIGNAL_BIT, CountData, json
 from pachicounter.plugin import ICounter, UtilsMixin
-from pachicounter.util import gen_bonusrate, bit_is_enable
+from pachicounter.util import bonusrate, bit_is_enable
 
 
 class ghostneo(ICounter, UtilsMixin):
@@ -53,7 +53,7 @@ class ghostneo(ICounter, UtilsMixin):
 
     def build(self, cd):
         d = cd.counts
-        bonusrate = gen_bonusrate(d['totalcount'], d['chance'])
+        bonus_rate = bonusrate(d['totalcount'], d['chance'])
         if cd['chancetime'] == 1:
             color = self.rgb2int(0xff, 0xff, 0x33)
             dd = {
@@ -69,7 +69,7 @@ class ghostneo(ICounter, UtilsMixin):
             dd = {
                 'framesvg0': 'resource/blueflame_wide.svg',
                 '0': {'text': '{count}<small> / {totalcount}</small>'},
-                '1': {'text': bonusrate},
+                '1': {'text': bonus_rate},
                 '2': {'text': '{bonus}<small> ({chance})</small>'},
                 '4': {'text': ' '}
             }

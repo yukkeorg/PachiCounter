@@ -3,8 +3,9 @@
 import time
 
 from pachicounter.core import SIGNAL_BIT, CountData, json
-from pachicounter.plugin import ICounter, UtilsMixin, BonusRound
-from pachicounter.util import (gen_bonusrate, bit_is_enable,
+from pachicounter.plugin import (ICounter, UtilsMixin, BonusRound,
+                                 BonusDetectorBase)
+from pachicounter.util import (bonusrate, bit_is_enable,
                                calcLpsOnNorm, calcLpsOnChance)
 
 
@@ -22,7 +23,7 @@ class DeltaTime(object):
         self.__prev = time.time()
 
 
-class uforush(ICounter, UtilsMixin):
+class uforush(ICounter, UtilsMixin, BonusDetectorBase):
     NORMAL_LPS = calcLpsOnNorm(3, 20)           # lose_pts/sec
     CHANCE_LPS = calcLpsOnChance(0.80)
 
@@ -107,7 +108,7 @@ class uforush(ICounter, UtilsMixin):
             cd.totalcount += cd.count
 
     def build(self, cd):
-        bonusrate = gen_bonusrate(cd.totalcount, cd.chance)
+        bonus_rate = bonusrate(cd.totalcount, cd.chance)
         if cd.chancetime == 1:
             dd = {
                 "framesvg0": "resource/orangeflame_wide.svg",
@@ -127,7 +128,7 @@ class uforush(ICounter, UtilsMixin):
             dd = {
                 "framesvg0": "resource/blueflame_wide.svg",
                 "0": {"text": "{count}<small> / {totalcount}</small>"},
-                "1": {"text": bonusrate},
+                "1": {"text": bonus_rate},
                 "2": {"text": "{bonus}<small> ({chance})</small>"},
                 "3": {"text": "{voutput:.0f}<small><small> PTS</small></small>"},
                 "4": {"text": "{spg:.2f}sec/G"},

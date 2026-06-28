@@ -36,7 +36,7 @@ class BonusRound:
 
 
 class BonusDetectorBase:
-    BonusRoundList: Tuple[BonusRound] = ()
+    BonusRoundList: Tuple[BonusRound, ...] = ()
 
     def detectBonus(self, t: float):
         for bi in self.BonusRoundList:
@@ -54,10 +54,10 @@ class ICounter:
     def createCountData(self):
         raise NotImplementedError
 
-    def on(self, bit, state, countdata):
+    def on(self, bit, state, countdata, /):
         raise NotImplementedError
 
-    def off(self, bit, state, countdata):
+    def off(self, bit, state, countdata, /):
         raise NotImplementedError
 
     def build(self, cd):

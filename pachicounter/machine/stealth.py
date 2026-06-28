@@ -2,7 +2,7 @@
 
 from pachicounter.core import SIGNAL_BIT, CountData, json
 from pachicounter.plugin import ICounter, UtilsMixin
-from pachicounter.util import gen_bonusrate, bit_is_enable
+from pachicounter.util import bonusrate, bit_is_enable
 
 
 class stealth(ICounter, UtilsMixin):
@@ -43,14 +43,14 @@ class stealth(ICounter, UtilsMixin):
 
     def build(self, cd):
         d = cd.counts
-        bonusrate = gen_bonusrate(d['totalcount'], d['chance'])
+        bonus_rate = bonusrate(d['totalcount'], d['chance'])
         if cd['chancetime'] == 1:
             chainstr = "STEALTH RUSH - {0} Bonus".format(self.ordering(d['chain']))
             color = self.rgb2int(0xff, 0xff, 0x33)
             dd = {
                 'framesvg0': 'resource/orangeflame_wide.svg',
                 '0': {'text': '{count} <small>OF</small> 99'.format(**d)},
-                '1': {'text': bonusrate},
+                '1': {'text': bonus_rate},
                 '2': {'text': '{bonus} / {chance}'.format(**d)},
                 '4': {'text': chainstr}
             }
@@ -60,7 +60,7 @@ class stealth(ICounter, UtilsMixin):
             dd = {
                 'framesvg0': 'resource/blueflame_wide.svg',
                 '0': {'text': '{count} / {totalcount}'.format(**d)},
-                '1': {'text': bonusrate},
+                '1': {'text': bonus_rate},
                 '2': {'text': '{bonus} / {chance}'.format(**d)},
                 '4': {'text': ' '}
             }

@@ -66,13 +66,17 @@ class CountData:
     def save(self, filename):
         with open(filename, 'wb') as fp:
             s = json.dumps(self.__dict__['counts'])
-            fp.write(s.encode('utf-8'))
+            # orjson.dumps は bytes を返すが、ujson/標準json は str を返す
+            if isinstance(s, str):
+                s = s.encode('utf-8')
+            fp.write(s)
 
     def load(self, filename, raise_ok=False):
         try:
             with open(filename, 'rb') as fp:
                 try:
-                    data = json.load(fp)
+                    # orjson には load() が無いため、全バックエンド共通の loads() を使う
+                    data = json.loads(fp.read())
                 except Exception:
                     return
             for k in data:
